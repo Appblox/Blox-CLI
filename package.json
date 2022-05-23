@@ -1,11 +1,13 @@
 {
-  "name": "appblox-cli",
-  "version": "1.0.0",
-  "description": "CLI tool for appblox",
+  "name": "Blox CLI",
+  "version": "0.0.1",
+  "description": "CLI to Create, Run, Build and Deploy Blox and Apps.",
   "main": "./bin/index.js",
   "bin": {
     "blox": "./bin/index.js"
   },
+
+  "repository": "https://github.com/Appblox/Blox-CLI",
   "scripts": {
     "prepare": "npx husky install",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -20,7 +22,7 @@
     ]
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@babel/parser": "^7.17.9",
     "ansi-escapes": "4.3.2",
