@@ -1,0 +1,21 @@
+const { execSync } = require('child_process')
+const { readdirSync } = require('fs')
+const path = require('path')
+
+const extensionOf = (fname) =>
+  // eslint-disable-next-line no-bitwise
+  fname.slice(((fname.lastIndexOf('.') - 1) >>> 0) + 2)
+
+const flush = () => {
+  const filesToDelete = readdirSync('.').reduce((acc, curr) => {
+    if (extensionOf(curr) === 'log') return acc.concat(path.resolve(curr))
+    if (curr === 'logs') return acc.concat(path.resolve(curr))
+    return acc
+  }, [])
+
+  filesToDelete.forEach((p) => {
+    execSync(`rm -r ${p}`)
+  })
+}
+
+module.exports = flush

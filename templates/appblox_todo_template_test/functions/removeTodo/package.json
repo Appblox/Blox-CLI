@@ -1,0 +1,19 @@
+{
+  "name": "removetodo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js --port=3002"
+  },
+  "keywords": [],
+  "author": "",
+  "type": "module",
+  "license": "ISC",
+  "dependencies": {
+    "blox-js-sdk": "git+https://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:x-oauth-basic@github.com/Appblox/blox-js-sdk.git",
+    "ab-federation-helpers": "git+https://github.com/Appblox/ab-federation-helpers.git",
+    "node-blox-sdk": "git+https://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:x-oauth-basic@github.com/Appblox/node-blox-sdk.git"
+  }
+}

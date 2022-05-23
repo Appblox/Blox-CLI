@@ -1,0 +1,72 @@
+{
+  "name": "_ab_todo",
+  "type": "appBlox",
+  "dependencies": {
+    "addTodo": {
+      "directory": "./functions/_ab_todo_addTodo",
+      "meta": {
+        "type": "function",
+        "source": "git@github.com:appblox/_ab_todo_addtodo.git",
+        "language": "nodejs",
+        "start": "node index.js",
+        "build": "npm run build",
+        "postPull": "npm i"
+      }
+    },
+    "listTodos": {
+      "directory": "./functions/_ab_todo_listTodos",
+      "meta": {
+        "type": "function",
+        "source": "git@github.com:appblox/_ab_todo_listtodos.git",
+        "language": "nodejs",
+        "start": "node index.js",
+        "build": "npm run build",
+        "postPull": "npm i"
+      }
+    },
+    "removeTodo": {
+      "directory": "./functions/_ab_todo_removeTodo",
+      "meta": {
+        "type": "function",
+        "source": "git@github.com:appblox/_ab_todo_removetodo.git",
+        "language": "nodejs",
+        "start": "node index.js",
+        "build": "npm run build",
+        "postPull": "npm i"
+      }
+    },
+    "todoInput": {
+      "directory": "./view/elements/_ab_todo_todoInput",
+      "meta": {
+        "type": "ui",
+        "source": "git@github.com:appblox/_ab_todo_todoinput.git",
+        "language": "js",
+        "start": "npx webpack-dev-server",
+        "build": "npm run build",
+        "postPull": "npm i"
+      }
+    },
+    "todoItem": {
+      "directory": "./view/elements/_ab_todo_todoItem",
+      "meta": {
+        "type": "ui",
+        "source": "git@github.com:appblox/_ab_todo_todoitem.git",
+        "language": "js",
+        "start": "npx webpack-dev-server",
+        "build": "npm run build",
+        "postPull": "npm i"
+      }
+    },
+    "todoContainer": {
+      "directory": "./view/container/_ab_todo_todoContainer",
+      "meta": {
+        "type": "todoContainer",
+        "source": "git@github.com:appblox/_ab_todo_todocontainer.git",
+        "language": "js",
+        "start": "npx webpack-dev-server",
+        "build": "npm run build",
+        "postPull": "npm i"
+      }
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "name": "_ab_todo",
+  "type": "appBlox",
+  "env": {
+    "functions": {
+      "DB_FILE_PATH": "../db.json"
+    },
+    "view": {
+      "BLOX_ENV_TEST": "TEST ENV"
+    }
+  },
+  "dependencies": {
+    "todoInput": {
+      "directory": "./view/elements/todoInput",
+      "meta": {
+        "name": "todoInput",
+        "type": "ui-elements",
+        "source": {
+          "https": "",
+          "ssh": "git@github.com:appblox/_ab_todo_todoinput.git"
+        },
+        "language": "js",
+        "start": "npx webpack-dev-server",
+        "build": "npm run build",
+        "postPull": "npm i"
+      }
+    },
+    "todoItem": {
+      "directory": "./view/elements/todoItem",
+      "meta": {
+        "name": "todoItem",
+        "type": "ui-elements",
+        "source": {
+          "https": "",
+          "ssh": "git@github.com:appblox/_ab_todo_todoitem.git"
+        },
+        "language": "js",
+        "start": "npx webpack-dev-server",
+        "build": "npm run build",
+        "postPull": "npm i"
+      }
+    },
+    "todoContainer": {
+      "directory": "./view/container/todoContainer",
+      "components": {
+        "todoItem": "todoItem",
+        "todoInput": "todoInput"
+      },
+      "meta": {
+        "name": "todoContainer",
+        "type": "ui-container",
+        "source": {
+          "https": "",
+          "ssh": "git@github.com:appblox/_ab_todo_todocontainer.git"
+        },
+        "language": "js",
+        "start": "npx webpack-dev-server",
+        "build": "npm run build",
+        "postPull": "npm i"
+      }
+    },
+    "addTodo": {
+      "directory": "./functions/addTodo",
+      "meta": {
+        "name": "addTodo",
+        "type": "function",
+        "source": {
+          "https": "",
+          "ssh": "git@github.com:appblox/_ab_todo_addtodo.git"
+        },
+        "language": "nodejs",
+        "start": "node index.js",
+        "build": "npm run build",
+        "postPull": "npm i"
+      }
+    },
+    "listTodos": {
+      "directory": "./functions/listTodos",
+      "meta": {
+        "name": "listTodos",
+        "type": "function",
+        "source": {
+          "https": "",
+          "ssh": "git@github.com:appblox/_ab_todo_listtodos.git"
+        },
+        "language": "nodejs",
+        "start": "node index.js",
+        "build": "npm run build",
+        "postPull": "npm i"
+      }
+    },
+    "removeTodo": {
+      "directory": "./functions/removeTodo",
+      "meta": {
+        "name": "removeTodo",
+        "type": "function",
+        "source": {
+          "https": "",
+          "ssh": "git@github.com:appblox/removetodo.git"
+        },
+        "language": "nodejs",
+        "start": "node index.js",
+        "build": "npm run build",
+        "postPull": "npm i"
+      }
+    }
+  }
+}
