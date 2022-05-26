@@ -34,6 +34,7 @@ const checkAndSetGitConnectionPreference = require('../utils/checkAndSetGitConne
 const pullAppblox = require('../utils/pullAppblox')
 const pnpmTest = require('../subcommands/test')
 const addTags = require('../subcommands/addTags')
+const addCategories = require('../subcommands/addCategories')
 
 inquirer.registerPrompt('file-tree-selection', inquirerFileTree)
 inquirer.registerPrompt('customList', customList)
@@ -169,6 +170,12 @@ async function init() {
     .option('-all, --all', 'Add tags to all bloxes')
     .description('blox add tags')
     .action(addTags)
+
+  program
+    .command('add-categories')
+    .option('-all, --all', 'Add categories to all bloxes')
+    .description('blox assign categories to bloxes')
+    .action(addCategories)
 
   // ======================FOR TESTING====================
   program.command('updateReadme', 'commit and push bloxes', {

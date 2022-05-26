@@ -19,6 +19,8 @@ api.appBloxAddVersion = `${api.appBloxRegistryOrigin}/api/registry/v0.1/add-blox
 api.appBloxUpdateAppConfig = `${api.appBloxRegistryOrigin}/api/registry/v0.1/update-app-config`
 api.appBloxGetAppConfig = `${api.appBloxRegistryOrigin}/api/registry/v0.1/get-app-config`
 api.appRegistryAssignTags = `${api.appBloxRegistryOrigin}/api/registry/v0.1/assign-blox-tags`
+api.appRegistryAssignCategories = `${api.appBloxRegistryOrigin}/api/registry/v0.1/assign-blox-category`
+api.appRegistryGetCategories = `${api.appBloxRegistryOrigin}/api/registry/v0.1/list-categories`
 
 const github = {}
 github.githubOrigin = `https://github.com`
