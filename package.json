@@ -1,6 +1,6 @@
 {
   "name": "Blox CLI",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "CLI to Create, Run, Build and Deploy Blox and Apps.",
   "main": "./bin/index.js",
   "bin": {
