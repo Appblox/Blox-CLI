@@ -1,1 +1,0 @@
-export default { testShared: 'testShared' }

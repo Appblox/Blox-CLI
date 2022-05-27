@@ -1,6 +1,7 @@
 const inquirer = require('inquirer')
 const axios = require('axios')
 const chalk = require('chalk')
+const Spinnies = require('spinnies')
 // const { execSync, exec } = require('child_process')
 // const { getTemplate } = require('./questionPrompts')
 const { cloneTemplateRepository, createRepository } = require('./Mutations')
@@ -23,6 +24,8 @@ const { GitManager } = require('./gitmanager')
  */
 // eslint-disable-next-line consistent-return
 async function createRepo(username, ownerId, ownerType, orgName, prefix, bloxShortName, _fromPull, clonePath) {
+  const spinnies = new Spinnies()
+
   /**
    * @type { Null|String} The user selected template repo
    */
@@ -78,6 +81,7 @@ async function createRepo(username, ownerId, ownerType, orgName, prefix, bloxSho
   // })
   // const apiGraph = ' https://api.github.com/graphql'
   const headersV4 = getGitHeader()
+
   try {
     /**
      * bloxFinalName is used here because, the passed name might be available in registry,
@@ -88,7 +92,9 @@ async function createRepo(username, ownerId, ownerType, orgName, prefix, bloxSho
     let bloxFinalName = ''
 
     const data = await (async function callToGitHub(checkThisName) {
-      console.log(chalk.dim(`\nchecking name availability of ${checkThisName}\n`))
+      spinnies.add('createRepo', { text: 'Preparing..' })
+      spinnies.update('createRepo', { text: `checking name availability of ${checkThisName}` })
+      // console.log(chalk.dim(`\nchecking name availability of ${checkThisName}\n`))
       bloxFinalName = checkThisName
       const PREFIXED_BLOXNAME = `${clonePath !== '.' ? `_${prefix}_` : ``}${checkThisName}`
       // console.log(PREFIXED_BLOXNAME)
@@ -116,12 +122,19 @@ async function createRepo(username, ownerId, ownerType, orgName, prefix, bloxSho
         if (innerData.errors.length === 1 && innerData.errors[0].type === 'UNPROCESSABLE') {
           // await checkBloxNameAvailability('', true)
           // Could be repo name already exists error
-          console.log(chalk.red(`Repo name ${PREFIXED_BLOXNAME} already exists\n`))
+          // console.log(chalk.red(`Repo name ${PREFIXED_BLOXNAME} already exists\n`))
+
+          spinnies.fail('createRepo', { text: `Repo name ${PREFIXED_BLOXNAME} already exists` })
+          spinnies.remove('createRepo')
+
           const newShortName = await checkBloxNameAvailability('', true)
           return callToGitHub(newShortName)
         }
+        spinnies.fail('createRepo', { text: `Something went wrong!` })
         throw new Error(`Something went wrong with query,\n${JSON.stringify(innerData)}`)
       }
+
+      spinnies.succeed('createRepo', { text: 'Name available' })
       return innerData
     })(bloxShortName)
 
@@ -155,12 +168,17 @@ async function createRepo(username, ownerId, ownerType, orgName, prefix, bloxSho
     // execSync(`git clone ${repoUrl} ${clonePath}/${name}`, {
     //   stdio: 'ignore',
     // })
+
+    spinnies.add('clone', { text: 'Cloning code' })
+
     const repoUrl = configstore.get('prefersSsh') ? sshUrl : url
     const git = new GitManager('.', name, repoUrl, configstore.get('prefersSsh'))
 
     await git.clone(`${clonePath}/${name}`)
-    console.log(`cloning to ${clonePath}/${name} from ${repoUrl}`)
-    console.log(chalk.green('Successfully Cloned!'))
+    // console.log(`cloning to ${clonePath}/${name} from ${repoUrl}`)
+    // console.log(chalk.green('Successfully Cloned!'))
+    spinnies.succeed('clone', { text: 'Successfully cloned' })
+    spinnies.remove('clone')
     // console.log('dafdasfa', data)
     // return cloneTemplateRepository.Tr(data)
     return template
@@ -168,6 +186,8 @@ async function createRepo(username, ownerId, ownerType, orgName, prefix, bloxSho
       : { bloxFinalName, ...createRepository.Tr(data) }
   } catch (err) {
     // if cloning failed, set sync points and later sysnc
+    spinnies.fail('clone', { text: 'Cloning failed' })
+    spinnies.remove('clone')
     console.log(err)
     console.log(chalk.red(`<<${err.message}>>`))
   }

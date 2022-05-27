@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 const axios = require('axios')
+const Spinnies = require('spinnies')
 const { appBloxRegister } = require('./api')
 const { getShieldHeader } = require('./getHeaders')
 
@@ -20,6 +21,9 @@ async function registerBlox(blox_type, blox_name, blox_short_name, is_public, gi
 
   // console.log(process.env.NODE_ENV);
   //   console.log(blox_type, blox_name, blox_short_name, blox_desc, github_url)
+  const spinnies = new Spinnies()
+
+  spinnies.add('register', { text: `Registering ${blox_name}` })
 
   try {
     const headers = getShieldHeader()
@@ -38,10 +42,14 @@ async function registerBlox(blox_type, blox_name, blox_short_name, is_public, gi
       }
     )
 
-    console.log('Blox registered succesfully')
+    spinnies.succeed('register', { text: `${blox_name} registered successfully` })
+    spinnies.remove('register')
+    // console.log('Blox registered succesfully')
     // console.log(res.data)
     return res.data
   } catch (err) {
+    spinnies.fail('register', { text: `${blox_name} registeration failed` })
+    spinnies.remove('register')
     console.log(err)
     console.log('Something went wrong! in registerblox')
   }

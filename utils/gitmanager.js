@@ -177,7 +177,7 @@ class GitManager {
 
   async _run(operation, opts) {
     const r = await pexec(`git ${operation} ${opts.join(' ')}`, { cwd: this.cwd })
-    console.log(r)
+    // console.log(r)
     if (r.status === 'error') {
       // resetHead should be based on performed operation..dont always pass false
       throw new GitError(this.cwd, r.msg, false, operation, opts)

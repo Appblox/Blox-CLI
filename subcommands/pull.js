@@ -1,8 +1,8 @@
 const path = require('path')
 const axios = require('axios')
-const { execSync } = require('child_process')
 const { readFileSync, writeFileSync } = require('fs')
 const chalk = require('chalk')
+const Spinnies = require('spinnies')
 
 const createBlox = require('../utils/createBlox')
 
@@ -14,10 +14,13 @@ const { appConfig } = require('../utils/appconfigStore')
 const convertGitSshUrlToHttps = require('../utils/convertGitUrl')
 const { configstore } = require('../configstore')
 const { GitManager } = require('../utils/gitmanager')
+const { runBash } = require('./bash')
 
 const pull = async (componentName, { cwd = '.' }) => {
   // Pull must happen only inside an appBlox
   appConfig.init(cwd)
+
+  const spinnies = new Spinnies()
 
   const headers = getShieldHeader()
 
@@ -25,6 +28,9 @@ const pull = async (componentName, { cwd = '.' }) => {
    * @type {bloxMetaData}
    */
   let metaData
+
+  spinnies.add('bloxExistsCheck', { text: `Searching for ${componentName}` })
+
   try {
     // TODO
     // Now if blox is not present 204 with empty data is send
@@ -38,7 +44,8 @@ const pull = async (componentName, { cwd = '.' }) => {
     )
 
     if (resp.status === 204) {
-      console.log(chalk.redBright(`${componentName} doesn't exists in blox repository`))
+      spinnies.fail('bloxExistsCheck', { text: `${componentName} doesn't exists in blox repository` })
+      // console.log(chalk.redBright(`${componentName} doesn't exists in blox repository`))
       process.exit(1)
     }
 
@@ -53,11 +60,14 @@ const pull = async (componentName, { cwd = '.' }) => {
     }
   } catch (err) {
     // console.log('Something went wrong while getting blox details..')
+    spinnies.fail('bloxExistsCheck', { text: `${err}` })
     console.log('\n')
     console.log(err)
     process.exit(1)
   }
 
+  spinnies.succeed('bloxExistsCheck', { text: `${componentName} is available` })
+  spinnies.remove('bloxExistsCheck')
   // console.log(metaData, 'details')
 
   // if not errored continue
@@ -171,7 +181,16 @@ const pull = async (componentName, { cwd = '.' }) => {
   }
 
   // RUN the post pull script here
-  execSync(`cd ${pulledBloxPath} `)
+  // execSync(`cd ${pulledBloxPath} `)
+  // TODO: use pnpm
+  spinnies.add('npmi', { text: 'Installing dependencies' })
+  const ireport = await runBash('npm i', pulledBloxPath)
+  if (ireport.status === 'failed') {
+    spinnies.fail('npmi', { text: ireport.msg })
+  } else {
+    spinnies.succeed('npmi', { text: 'Dependencies installed' })
+  }
+  spinnies.remove('npmi')
 }
 
 module.exports = pull

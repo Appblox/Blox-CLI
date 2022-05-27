@@ -3,15 +3,20 @@ const path = require('path')
 const { appConfig } = require('../utils/appconfigStore')
 
 const log = async (bloxname) => {
-  console.log(`Showing log of ${bloxname}`)
   appConfig.init()
   if (!appConfig.has(bloxname)) {
     console.log('Blox Doesnt exists')
     return
   }
+  if (!appConfig.isLive(bloxname)) {
+    console.log(`${bloxname} is not live.`)
+    console.log(`Run blox start ${bloxname} to start the blox.`)
+    return
+  }
+  console.log(`Showing log of ${bloxname}`)
 
   const appLiveData = appConfig.getBloxWithLive(bloxname)
-  console.log(appLiveData)
+  // console.log(appLiveData)
   // TODO : avoid using .meta.type, write a func like typeof() so,
   // even if data shape changes, it can be fixed easily
   const logPath = appLiveData.meta.type === 'function' ? path.resolve('logs/out/functions.log') : appLiveData.log.out

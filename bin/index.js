@@ -32,7 +32,6 @@ const exec = require('../subcommands/exec')
 // const test = require('../subcommands/test')
 const checkAndSetGitConnectionPreference = require('../utils/checkAndSetGitConnectionStrategy')
 const pullAppblox = require('../utils/pullAppblox')
-const pnpmTest = require('../subcommands/test')
 const addTags = require('../subcommands/addTags')
 const addCategories = require('../subcommands/addCategories')
 
@@ -87,9 +86,9 @@ async function init() {
   program.command('connect', 'to connect to service', {
     executableFile: '../subcommands/connect',
   })
-  program.command('logout', 'to logout of appblox', {
-    executableFile: '../subcommands/logout',
-  })
+  // program.command('logout', 'to logout of appblox', {
+  //   executableFile: '../subcommands/logout',
+  // })
   program.command('login', 'to login to appblox server', {
     executableFile: '../subcommands/login',
   })
@@ -134,18 +133,17 @@ async function init() {
 
   program.command('sync').description('To sync all bloxes').action(sync)
 
-  program.command('emulate', 'to start blox', {
-    executableFile: '../subcommands/emulate',
-  })
-  program.command('stop-emulator', 'to start blox', {
-    executableFile: '../subcommands/stop-emulator',
-  })
+  // program.command('emulate', 'to start blox', {
+  //   executableFile: '../subcommands/emulate',
+  // })
+  // program.command('stop-emulator', 'to start blox', {
+  //   executableFile: '../subcommands/stop-emulator',
+  // })
 
   program.command('pull').argument('<component>', 'name of component').action(pull)
 
   program.command('pull_appblox').argument('<component>', 'name of component').action(pullAppblox)
 
-  // program.command('push-config', { hidden: true }).action(push_config)
   program.command('push-config').action(push_config)
   program
     .command('push')
@@ -167,24 +165,15 @@ async function init() {
 
   program
     .command('add-tags')
-    .option('-all, --all', 'Add tags to all bloxes')
+    .option('-A, --all', 'Add tags to all bloxes')
     .description('blox add tags')
     .action(addTags)
 
   program
     .command('add-categories')
-    .option('-all, --all', 'Add categories to all bloxes')
+    .option('-A, --all', 'Add categories to all bloxes')
     .description('blox assign categories to bloxes')
     .action(addCategories)
-
-  // ======================FOR TESTING====================
-  program.command('updateReadme', 'commit and push bloxes', {
-    executableFile: '../subcommands/updateReadme',
-    hidden: true,
-  })
-
-  program.command('test', { hidden: true }).option('-d,--del').description('testing purpose').action(pnpmTest)
-  // program.command('test').argument('<name>').action(test)
 
   program.parseAsync(process.argv)
 }

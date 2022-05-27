@@ -80,7 +80,7 @@ function createComponent(bloxShortName, createFromExistinURL, clonePath) {
                 !!createFromExistinURL,
                 clonePath || '.'
               )
-              console.log('rose', ret)
+              // console.log('rose', ret)
               result = ret
               Emitter.complete(ret)
               // if (template) {
