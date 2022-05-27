@@ -6,9 +6,11 @@ const { bloxTypes } = require('./bloxTypes')
 const { configstore } = require('../configstore')
 const GitPaginator = require('./paginateGitRest')
 const CustomListV2 = require('./cutomListV2')
+const customSelect = require('./multiSelect')
 
 inquirer.registerPrompt('customList', customList)
 inquirer.registerPrompt('CustomListV2', CustomListV2)
+inquirer.registerPrompt('customSelect', customSelect)
 
 function getBloxShortName(bloxName) {
   const question = {
