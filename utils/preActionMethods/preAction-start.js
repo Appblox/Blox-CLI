@@ -1,6 +1,6 @@
 const { existsSync, mkdirSync } = require('fs')
 
-const checkLogDirs = (spinnies, name) => {
+const checkLogDirs = () => {
   try {
     if (!existsSync('logs/out')) {
       mkdirSync('logs/out', { recursive: true })
@@ -9,7 +9,6 @@ const checkLogDirs = (spinnies, name) => {
       mkdirSync('logs/err', { recursive: true })
     }
   } catch (err) {
-    spinnies.fail(name, { text: 'Failed' })
     console.log('Error in creating log dirs', err.message)
   }
 }

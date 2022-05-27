@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 const inquirer = require('inquirer')
-const chalk = require('chalk')
+// const chalk = require('chalk')
 const inquirerFileTree = require('inquirer-file-tree-selection-prompt')
 const { Command, Option } = require('commander')
-const Spinnies = require('spinnies')
+// const Spinnies = require('spinnies')
 // const chalk = require('chalk')
 
 // UTILS
@@ -13,12 +13,12 @@ const customList = require('../utils/customList')
 const packageJson = require('../package.json')
 const { bloxTypes } = require('../utils/bloxTypes')
 const Init = require('../subcommands/init')
-const { isGitInstalled, isInGitRepository } = require('../utils/gitCheckUtils')
-const { ensureUserLogins } = require('../utils/ensureUserLogins')
+// const { isGitInstalled, isInGitRepository } = require('../utils/gitCheckUtils')
+// const { ensureUserLogins } = require('../utils/ensureUserLogins')
 
 const log = require('../subcommands/log')
 const start = require('../subcommands/start')
-const { checkLogDirs } = require('../utils/preActionMethods/preAction-start')
+// const { checkLogDirs } = require('../utils/preActionMethods/preAction-start')
 const ls = require('../subcommands/ls')
 const flush = require('../subcommands/flush')
 const push = require('../subcommands/push')
@@ -34,6 +34,7 @@ const checkAndSetGitConnectionPreference = require('../utils/checkAndSetGitConne
 const pullAppblox = require('../utils/pullAppblox')
 const addTags = require('../subcommands/addTags')
 const addCategories = require('../subcommands/addCategories')
+const { preActionChecks } = require('../utils/preActionRunner')
 
 inquirer.registerPrompt('file-tree-selection', inquirerFileTree)
 inquirer.registerPrompt('customList', customList)
@@ -43,40 +44,10 @@ process.global = { cwd: process.cwd() }
 // let APPCONFIG
 
 async function init() {
-  const spinnies = new Spinnies()
+  // const spinnies = new Spinnies()
   const program = new Command().hook('preAction', async (_, actionCommand) => {
-    // TODO -- include an ssh check here if user prefers to use ssh
-    // That info must be stored in global config, provide personnel access
-    // token auth as well using octokit
     const subcommand = actionCommand.parent.args[0]
-    spinnies.add('s1', { text: 'Starting...' })
-    spinnies.update('s1', { text: 'Checking Git..' })
-    if (!isGitInstalled()) {
-      spinnies.fail('s1', { text: 'Git not installed..' })
-      process.exit(1)
-    }
-    spinnies.update('s1', { text: 'Git Installed' })
-    spinnies.update('s1', { text: 'Checking Logins..' })
-    await ensureUserLogins(spinnies, 's1')
-    spinnies.update('s1', { text: 'Logins done..' })
-
-    switch (subcommand) {
-      // To add command specific checks
-      case 'start':
-        checkLogDirs(spinnies, 's1')
-        break
-      case 'init':
-        if (isInGitRepository()) {
-          console.log('Already in a Git repository')
-          process.exit(1)
-        }
-        break
-      default:
-        break
-    }
-    spinnies.succeed('s1', {
-      text: `Starting ${chalk.bold(subcommand)} command..`,
-    })
+    await preActionChecks(subcommand)
     await checkAndSetGitConnectionPreference()
   })
 

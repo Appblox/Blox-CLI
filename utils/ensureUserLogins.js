@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-expressions */
 const axios = require('axios')
+const Spinnies = require('spinnies')
 const { checkAndSetAuth } = require('./checkAndSetAuth')
 const { githubGetDeviceCode, githubClientID } = require('./api')
 const handleGithubAuth = require('./handleGithubAuth')
@@ -8,12 +9,13 @@ const { loginWithAppBlox } = require('../auth')
 const { getAppBloxSignedInUser } = require('./getSignedInUser')
 const { configstore } = require('../configstore')
 
-async function ensureUserLogins(spinnies, name) {
+async function ensureUserLogins() {
   // await login()
-  spinnies?.update(name, { text: 'Checking Git auths' })
+  const spinnies = new Spinnies()
+  spinnies.add('logins', { text: 'Checking Git auths' })
   const { redoAuth } = await checkAndSetAuth()
   if (redoAuth) {
-    spinnies.update(name, {
+    spinnies.update('logins', {
       text: 'Git not logged in',
       status: 'stopped',
       color: 'yellow',
@@ -25,12 +27,14 @@ async function ensureUserLogins(spinnies, name) {
     })
     await handleGithubAuth(decodeURIComponent(response.data))
   }
-
-  spinnies?.add(name, { text: 'Git auth done' })
+  if (!spinnies.hasActiveSpinners()) {
+    spinnies.add('logins', { text: 'Git auth done' })
+  }
+  spinnies.update('logins', { text: 'Checking shield auths' })
 
   const { redoShieldAuth } = await checkAuth()
   if (redoShieldAuth) {
-    spinnies?.update(name, {
+    spinnies.update('logins', {
       text: 'Shield not logged in',
       status: 'stopped',
       color: 'yellow',
@@ -40,6 +44,12 @@ async function ensureUserLogins(spinnies, name) {
     const user = await getAppBloxSignedInUser(data.access_token)
     configstore.set('appBloxUserName', user.user)
   }
-  spinnies?.add(name, { text: 'Shield auth done' })
+
+  if (!spinnies.hasActiveSpinners()) {
+    spinnies.add('logins', { text: 'Shield auth done' })
+  }
+
+  spinnies.succeed('logins', { text: 'Logins Done' })
+  spinnies.remove('logins')
 }
 module.exports = { ensureUserLogins }
