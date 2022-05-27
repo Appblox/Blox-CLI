@@ -1,3 +1,4 @@
+/* eslint-disable no-async-promise-executor */
 const { readFileSync, writeFile } = require('fs')
 const path = require('path')
 const { EventEmitter } = require('events')
@@ -41,7 +42,7 @@ class AppbloxConfigManager {
     // this.events.on('liveChanged', () => this._writeLive())
     this.events.on('liveChanged', debounce(this._writeLive, 800).bind(this))
 
-    this.events.on('updateBloxWrite', debounce(this._updateBloxWrite, 800).bind(this))
+    // this.events.on('updateBloxWrite', debounce(this._updateBloxWrite, 800).bind(this))
 
     this.config = ''
   }
@@ -270,22 +271,26 @@ class AppbloxConfigManager {
   /**
    * Write emiter for update blox in blox config and appblox config
    */
-  _updateBloxWrite(bloxDir, bloxMeta) {
+  async _updateBloxWrite(bloxDir, bloxMeta) {
     // Update appblox config
-    writeFile(
-      path.resolve(this.cwd, this.configName),
-      JSON.stringify(this.config, null, 2),
-      { encoding: 'utf8' },
-      (_) => _
-    )
-
-    // Update blox config
-    writeFile(
-      path.resolve(bloxDir, this.bloxConfigName),
-      JSON.stringify(bloxMeta, null, 2),
-      { encoding: 'utf8' },
-      (_) => _
-    )
+    return new Promise((resolve) => {
+      writeFile(
+        path.resolve(this.cwd, this.configName),
+        JSON.stringify(this.config, null, 2),
+        { encoding: 'utf8' },
+        () => {
+          // Update blox config
+          writeFile(
+            path.resolve(bloxDir, this.bloxConfigName),
+            JSON.stringify(bloxMeta, null, 2),
+            { encoding: 'utf8' },
+            () => {
+              resolve(true)
+            }
+          )
+        }
+      )
+    })
   }
 
   /**
@@ -312,12 +317,14 @@ class AppbloxConfigManager {
    * @param {*} updateConfigData
    */
   updateBlox(name, updateConfigData) {
-    this.config.dependencies = { ...this.config.dependencies }
-    const { directory, meta } = this.config.dependencies[name]
-    const newBloxConfigData = { ...meta, ...updateConfigData }
-    this.config.dependencies[name].meta = newBloxConfigData
-
-    this.events.emit('updateBloxWrite', directory, newBloxConfigData)
+    return new Promise(async (resolve) => {
+      this.config.dependencies = { ...this.config.dependencies }
+      const { directory, meta } = this.config.dependencies[name]
+      const newBloxConfigData = { ...meta, ...updateConfigData }
+      this.config.dependencies[name].meta = newBloxConfigData
+      await this._updateBloxWrite(directory, newBloxConfigData)
+      resolve(true)
+    })
   }
 
   /**
@@ -326,7 +333,6 @@ class AppbloxConfigManager {
    */
   // eslint-disable-next-line class-methods-use-this
   getBloxId(bloxName) {
-    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
       try {
         const resp = await getBloxDetails(bloxName)

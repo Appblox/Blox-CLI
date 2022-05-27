@@ -33,6 +33,7 @@ const exec = require('../subcommands/exec')
 const checkAndSetGitConnectionPreference = require('../utils/checkAndSetGitConnectionStrategy')
 const pullAppblox = require('../utils/pullAppblox')
 const addTags = require('../subcommands/addTags')
+const addCategories = require('../subcommands/addCategories')
 
 inquirer.registerPrompt('file-tree-selection', inquirerFileTree)
 inquirer.registerPrompt('customList', customList)
@@ -164,9 +165,15 @@ async function init() {
 
   program
     .command('add-tags')
-    .option('-all, --all', 'Add tags to all bloxes')
+    .option('-A, --all', 'Add tags to all bloxes')
     .description('blox add tags')
     .action(addTags)
+
+  program
+    .command('add-categories')
+    .option('-A, --all', 'Add categories to all bloxes')
+    .description('blox assign categories to bloxes')
+    .action(addCategories)
 
   program.parseAsync(process.argv)
 }
