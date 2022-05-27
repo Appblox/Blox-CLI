@@ -1,12 +1,9 @@
 import fs from 'fs'
 import path from 'path'
 import { createFileSync, sendResponse } from './utils.js'
-
-// Change the sdk import to npm (currently for testing local path is given)
-// import { functions } from "../../../node-blox-sdk/index.js";
-
-// For testing take pull from Appblox/node-blox-sdk and npm install from path
 import { env } from 'node-blox-sdk'
+
+// Init environment
 env.init()
 
 /**
@@ -37,7 +34,3 @@ const listTodos = (req, res) => {
   }
 }
 export default listTodos
-
-/**
- * Run the function using node-blox-sdk
- */

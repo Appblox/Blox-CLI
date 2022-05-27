@@ -15,7 +15,8 @@ const generateUiContainerPackageJson = (name) => `
       "serve": "12.0.0",
       "webpack": "5.51.2",
       "webpack-cli": "4.8.0",
-      "webpack-dev-server": "4.1.0"
+      "webpack-dev-server": "4.1.0",
+      "node-blox-sdk": "^0.0.1"
     },
     "scripts": {
       "start": "webpack-dev-server",
@@ -27,9 +28,7 @@ const generateUiContainerPackageJson = (name) => `
       "react": "^17.0.2",
       "react-dom": "^17.0.2",
       "react-redux": "^7.2.5",
-      "blox-js-sdk": "git+https://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:x-oauth-basic@github.com/Appblox/blox-js-sdk.git",
-      "ab-federation-helpers":"git+https://github.com/Appblox/ab-federation-helpers.git",
-      "node-blox-sdk": "git+https://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:x-oauth-basic@github.com/Appblox/node-blox-sdk.git"
+      "blox-js-sdk": "^0.0.4"
     },
     "keywords": [],
     "author": "",
