@@ -159,7 +159,7 @@ async function createRepo(username, ownerId, ownerType, orgName, prefix, bloxSho
     const git = new GitManager('.', name, repoUrl, configstore.get('prefersSsh'))
 
     await git.clone(`${clonePath}/${name}`)
-    console.log(`cloning to ${clonePath}/${name} from ${repoUrl}`)
+    // console.log(`cloning to ${clonePath}/${name} from ${repoUrl}`)
     console.log(chalk.green('Successfully Cloned!'))
     // console.log('dafdasfa', data)
     // return cloneTemplateRepository.Tr(data)
