@@ -1,10 +1,10 @@
 import React from 'react'
-import todoItem from './todoItem'
+import TodoItem from './todoItem'
 
 export default function App(props) {
   return (
     <div>
-      <todoItem item="sdfsdf" id="sdfsdf" />
+      <TodoItem item="sdfsdf" id="sdfsdf" />
     </div>
   )
 }

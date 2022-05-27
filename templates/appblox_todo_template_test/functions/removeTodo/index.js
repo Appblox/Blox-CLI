@@ -1,9 +1,9 @@
 import fs from 'fs'
 import path from 'path'
 import { getBody, getDB, sendResponse } from './utils.js'
-
-// For testing take pull from Appblox/node-blox-sdk and npm install from path
 import { env } from 'node-blox-sdk'
+
+// Init environment
 env.init()
 
 /**
@@ -46,6 +46,3 @@ const removeTodo = async (req, res) => {
 }
 
 export default removeTodo
-/**
- * Run the function using node-blox-sdk
- */

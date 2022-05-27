@@ -22,6 +22,7 @@ function checkPort(port, host) {
   return tcpPortUsed.check(port, hostUrl)
 }
 const net = require('net')
+const { updateEnv } = require('../utils/env')
 
 // call method 1: (port, cb(err, freePort))
 // call method 2: (portBeg, portEnd, cb(err, freePort))
@@ -109,8 +110,45 @@ async function validateAndAssignPortProxy(p) {
   global.assignedPorts.push(port)
   return port
 }
+
+const getFreePorts = async (appConfig, bloxName) => {
+  // if blox name is passed return a port for that blox
+  if (bloxName) {
+    const bloxConfig = appConfig.getBloxWithLive(bloxName)
+    const portValue = await validateAndAssignPortProxy(bloxConfig.port)
+    return portValue
+  }
+
+  const ports = {}
+
+  // Get ports for ui bloxes
+  for (const blox of appConfig.uiBloxes) {
+    const bName = blox.meta.name
+    const bloxToStart = appConfig.getBloxWithLive(bName)
+    ports[bName] = await validateAndAssignPortProxy(bloxToStart.port)
+  }
+
+  // Get port for emulator
+  ports.emulator = await validateAndAssignPortProxy(5000)
+
+  // Update the ports to env
+  const envPortValues = Object.entries(ports).reduce((acc, [bName, bPort]) => {
+    if (bName === 'emulator') {
+      acc.BLOX_FUNCTION_URL = `http://localhost:${bPort}`
+    } else {
+      acc[`BLOX_ENV_URL_${bName}`] = `http://localhost:${bPort}`
+    }
+    return acc
+  }, {})
+  await updateEnv('view', envPortValues)
+  await updateEnv('functions', { BLOX_FUNCTION_URL: envPortValues.BLOX_FUNCTION_URL })
+
+  return ports
+}
+
 module.exports = {
   checkPort,
   findFreePort,
   validateAndAssignPort: validateAndAssignPortProxy,
+  getFreePorts,
 }

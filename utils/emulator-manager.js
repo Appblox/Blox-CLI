@@ -3,18 +3,7 @@ const fsPromise = require('fs/promises')
 
 const { runBash } = require('../subcommands/bash')
 
-const { getPort, portNumbers } = require('./portFindHelper')
-const { updateEnv } = require('./env')
-
-async function copyEmulatorCode() {
-  const PORT = await getPort({ port: portNumbers(5000, 5100) })
-  // TODO -- shouldn't this be function and not view?
-  // changing to function is causing app to fail
-  // ask Thalal.
-  await updateEnv('view', {
-    BLOX_FUNCTION_URL: `http://localhost:${PORT}`,
-  })
-
+async function copyEmulatorCode(PORT) {
   const emulatorCode = `
 
 import express from 'express';
@@ -104,12 +93,12 @@ function addEmulatorProcessData(processData) {
   fs.writeFileSync('./._ab_em/.emconfig.json', JSON.stringify(processData))
 }
 async function stopEmulator() {
-  console.log('Inside stop emulator')
   const processData = await getEmulatorProcessData()
   if (processData && processData.pid) {
     await runBash(`kill ${processData.pid}`)
   }
   await runBash('rm -rf ./._ab_em')
+  console.log('emulator stopped successfully!')
 }
 module.exports = {
   copyEmulatorCode,
