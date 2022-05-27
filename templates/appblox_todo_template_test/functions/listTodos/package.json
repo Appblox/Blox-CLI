@@ -12,8 +12,6 @@
   "type": "module",
   "license": "ISC",
   "dependencies": {
-    "blox-js-sdk": "git+https://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:x-oauth-basic@github.com/Appblox/blox-js-sdk.git",
-    "ab-federation-helpers": "git+https://github.com/Appblox/ab-federation-helpers.git",
-    "node-blox-sdk": "git+https://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:x-oauth-basic@github.com/Appblox/node-blox-sdk.git"
+    "node-blox-sdk": "^0.0.1"
   }
 }

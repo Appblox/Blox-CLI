@@ -5,10 +5,10 @@ const readline = require('readline')
 const path = require('path')
 const chalk = require('chalk')
 const { runBash, runBashLongRunning } = require('./bash')
-const { validateAndAssignPort } = require('./port-check')
+const { getFreePorts } = require('./port-check')
 const { getAbsPath } = require('../utils/path-helper')
 const emulateNode = require('./emulate')
-const { setupEnv, updateEnv } = require('../utils/env')
+const { setupEnv } = require('../utils/env')
 const { appConfig } = require('../utils/appconfigStore')
 
 global.rootDir = process.cwd()
@@ -70,7 +70,8 @@ const start = async (bloxname) => {
       console.log('Blox not found')
       process.exit(1)
     }
-    await startBlox(bloxname)
+    const port = await getFreePorts(appConfig, bloxname)
+    await startBlox(bloxname, port)
   }
 }
 
@@ -78,13 +79,17 @@ async function startAllBlox() {
   // let containerBlox = null
   const emulateLang = 'nodejs'
   let emData
+
+  // Build env for all bloxes
+  const PORTS = await getFreePorts(appConfig)
+
   spinnies.add('emulator', { text: 'Staring emulator' })
   switch (emulateLang) {
     case 'nodejs':
-      emData = await emulateNode()
+      emData = await emulateNode(PORTS.emulator)
       break
     default:
-      emData = await emulateNode()
+      emData = await emulateNode(PORTS.emulator)
       break
   }
   if (emData.status === 'success') {
@@ -100,13 +105,14 @@ async function startAllBlox() {
         },
       }
     }
-    spinnies.succeed('emulator', { text: 'Emulator started' })
+    spinnies.succeed('emulator', { text: `emulator started at ${emData.data.port}` })
   } else {
-    spinnies.fail('emulator', { text: `Emulator failed to start ${chalk.gray(`(${emData.msg})`)}` })
+    spinnies.fail('emulator', { text: `emulator failed to start ${chalk.gray(`(${emData.msg})`)}` })
   }
   const promiseArray = []
+
   for (const blox of appConfig.uiBloxes) {
-    promiseArray.push(startBlox(blox.meta.name))
+    promiseArray.push(startBlox(blox.meta.name, PORTS[blox.meta.name]))
     if (blox.meta.type === 'ui-container') {
       // containerBlox = blox
     }
@@ -152,7 +158,7 @@ async function startAllBlox() {
   //   console.log(`Visit url http://localhost:${containerBlox.port} to view the app`)
   // }
 }
-async function startBlox(name) {
+async function startBlox(name, port) {
   spinnies.add(name, { text: `Starting ${name}` })
   if (!appConfig.has(name)) {
     // console.log('Blox not found!')
@@ -163,15 +169,15 @@ async function startBlox(name) {
   let blox
   switch (bloxToStart.meta.language) {
     case 'nodejs': {
-      blox = await startNodeProgram(bloxToStart, name)
+      blox = await startNodeProgram(bloxToStart, name, port)
       break
     }
     case 'js': {
-      blox = await startJsProgram(bloxToStart, name)
+      blox = await startJsProgram(bloxToStart, name, port)
       break
     }
     case 'go': {
-      blox = await startGoProgram(bloxToStart, name)
+      blox = await startGoProgram(bloxToStart, name, port)
       break
     }
     default:
@@ -195,7 +201,7 @@ async function startBlox(name) {
   spinnies.fail(name, { text: `${name} failed to start ${chalk.gray(`${blox.msg}`)}` })
   return blox
 }
-async function startNodeProgram(blox, name) {
+async function startNodeProgram(blox, name, port) {
   try {
     const directory = getAbsPath(blox.directory)
     spinnies.update(name, { text: `Installing dependencies in ${name}` })
@@ -206,7 +212,7 @@ async function startNodeProgram(blox, name) {
     }
     spinnies.update(name, { text: `Dependencies installed in ${name}` })
     spinnies.update(name, { text: `Assigning port for ${name}` })
-    const port = await validateAndAssignPort(blox.port)
+    // const port = await validateAndAssignPort(blox.port)
     spinnies.update(name, { text: `Assigned port ${chalk.whiteBright(port)} for ${name}` })
 
     spinnies.update(name, { text: `Starting ${name} with ${chalk.whiteBright(blox.meta.start)}` })
@@ -216,10 +222,6 @@ async function startNodeProgram(blox, name) {
     const updatedBlox = { name, pid: childProcess.pid, port, isOn: true }
     const compilationReport = await watchCompilation(blox.log.out)
     spinnies.update(name, { text: `${name} Compiled with ${compilationReport.errors.length}  ` })
-    // Update envData
-    await updateEnv(blox.meta.type, {
-      [`BLOX_ENV_URL_${name}`]: `http://localhost:${port}`,
-    })
 
     const status = compilationReport.errors.length > 0 ? 'compiledwitherror' : 'success'
 
@@ -235,7 +237,7 @@ async function startNodeProgram(blox, name) {
     }
   }
 }
-async function startJsProgram(blox, name) {
+async function startJsProgram(blox, name, port) {
   try {
     const directory = getAbsPath(blox.directory)
     spinnies.update(name, { text: `Installing dependencies in ${name}` })
@@ -246,7 +248,6 @@ async function startJsProgram(blox, name) {
     }
     spinnies.update(name, { text: `Dependencies installed in ${name}` })
     spinnies.update(name, { text: `Assigning port for ${name}` })
-    const port = await validateAndAssignPort(blox.port)
     spinnies.update(name, { text: `Assigned port ${chalk.whiteBright(port)} for ${name}` })
     const startCommand = `${blox.meta.start} --port=${port}`
     const childProcess = runBashLongRunning(startCommand, blox.log, directory)
@@ -254,14 +255,7 @@ async function startJsProgram(blox, name) {
     const updatedBlox = { name, pid: childProcess.pid, port, isOn: true }
     const compilationReport = await watchCompilation(blox.log.out)
     spinnies.update(name, { text: `${name} Compiled with ${compilationReport.errors.length}  ` })
-    // Update envData
-    // const rootDir = blox.directory.split('/')[0]
-    // updateEnv(rootDir, {
-    //   [`BLOX_ENV_URL_${name}`]: `http://localhost:${port}`,
-    // })
-    updateEnv(blox.meta.type, {
-      [`BLOX_ENV_URL_${name}`]: `http://localhost:${port}`,
-    })
+
     const status = compilationReport.errors.length > 0 ? 'compiledwitherror' : 'success'
     return { status, msg: '', data: updatedBlox, compilationReport }
   } catch (err) {

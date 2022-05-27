@@ -9,9 +9,9 @@ global.rootDir = process.cwd()
 // structure..
 // program.argument('[name]', 'name ofa blox')
 
-const emulateNode = async () => {
+const emulateNode = async (port) => {
   try {
-    const port = await copyEmulatorCode()
+    await copyEmulatorCode(port)
     const i = await runBash('cd ./._ab_em/ && npm i')
     if (i.status === 'failed') {
       throw new Error(i.msg)
