@@ -1,10 +1,9 @@
 const api = {}
-// api.appBloxOrigin = `http://shield.appblox.io`
-api.appBloxOrigin = `https://shield-dev.appblox.io`
+api.appBloxOrigin = `http://shield.appblox.io`
 api.appBloxLogin = `${api.appBloxOrigin}/login`
 api.appBloxAccessToken = `${api.appBloxOrigin}/auth/device/get-token`
 
-api.appBloxRegistryOrigin = `https://registry-dev.appblox.io`
+api.appBloxRegistryOrigin = `https://registry-api.appblox.io`
 api.appBloxCheckBloxNameAvailability = `${api.appBloxRegistryOrigin}/api/registry/v0.1/check-blox-name-availabilty`
 api.appBloxRegister = `${api.appBloxRegistryOrigin}/api/registry/v0.0.1/register-blox`
 api.appBloxEditBlox = `${api.appBloxRegistryOrigin}/api/registry/v0.0.1/edit-blox`
