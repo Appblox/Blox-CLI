@@ -6,7 +6,6 @@
   "bin": {
     "blox": "./bin/index.js"
   },
-
   "repository": "https://github.com/Appblox/Blox-CLI",
   "scripts": {
     "prepare": "npx husky install",
