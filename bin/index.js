@@ -35,6 +35,7 @@ const pullAppblox = require('../utils/pullAppblox')
 const addTags = require('../subcommands/addTags')
 const addCategories = require('../subcommands/addCategories')
 const { preActionChecks } = require('../utils/preActionRunner')
+const publish = require('../subcommands/publish')
 
 inquirer.registerPrompt('file-tree-selection', inquirerFileTree)
 inquirer.registerPrompt('customList', customList)
@@ -145,6 +146,12 @@ async function init() {
     .option('-A, --all', 'Add categories to all bloxes')
     .description('blox assign categories to bloxes')
     .action(addCategories)
+
+  program
+    .command('publish')
+    .argument('<blox-name>', 'Name of blox to publish')
+    .description('Publish blox or appblox')
+    .action(publish)
 
   program.parseAsync(process.argv)
 }
