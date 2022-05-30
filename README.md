@@ -1,3 +1,3 @@
-# appblox-cli
+# Blox CLI
 
 CLI Docs
