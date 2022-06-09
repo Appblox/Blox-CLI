@@ -28,7 +28,7 @@ const appbloxexec = async (command, options) => {
   //   console.log('\n')
   //   process.exit(-1)
   // }
-  appConfig.init()
+  await appConfig.init()
   const bloxes = options.inside || []
   const missingBloxes = []
   const promiseArray = []

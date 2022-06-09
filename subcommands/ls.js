@@ -3,7 +3,7 @@ const Table = require('cli-table')
 const { appConfig } = require('../utils/appconfigStore')
 
 const ls = async () => {
-  appConfig.init()
+  await appConfig.init()
   const table = new Table({
     head: ['Blox Name', 'Type', 'PID', 'Port', 'Log', 'Status'].map((v) => chalk.cyanBright(v)),
   })

@@ -8,7 +8,7 @@ const { getCategories } = require('../utils/categoriesUtil')
 
 const addCategories = async (options) => {
   try {
-    appConfig.init()
+    await appConfig.init()
 
     const { all } = options
     const { dependencies } = appConfig.getAppConfig()

@@ -7,7 +7,7 @@ const { getShieldHeader } = require('../utils/getHeaders')
 const { getBloxDetails } = require('../utils/registryUtils')
 
 const push_config = async () => {
-  appConfig.init()
+  await appConfig.init()
 
   const spinnies = new Spinnies()
 

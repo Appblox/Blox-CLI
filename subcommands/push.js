@@ -7,7 +7,7 @@ const push = async (bloxname, options) => {
   const { force } = options
   let { message } = options
 
-  appConfig.init()
+  await appConfig.init()
 
   if (!force && !bloxname) {
     console.log(chalk.red(`\nPlease provide a blox name or use -f to push all..`))

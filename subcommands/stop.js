@@ -6,7 +6,7 @@ const { appConfig } = require('../utils/appconfigStore')
 global.rootDir = process.cwd()
 
 const stop = async (name) => {
-  appConfig.init()
+  await appConfig.init()
   if (!name) {
     stopAllBlox()
   } else if (appConfig.has(name)) {

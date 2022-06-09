@@ -49,7 +49,7 @@ const watchCompilation = (fileName) =>
   })
 const spinnies = new Spinnies()
 const start = async (bloxname) => {
-  appConfig.init()
+  await appConfig.init()
   // Setup env from appblox.config.json data
   const configData = appConfig.appConfig
   await setupEnv(configData)

@@ -83,7 +83,7 @@ const create = async (userPassedName, options, _, returnBeforeCreatingTemplates,
     // logger.info(
     //   `${componentName} checked against registry and ${availableName} is finalized`
     // )
-    appConfig.init()
+    await appConfig.init()
     // const shortName = await getBloxShortName(availableName)
     const { bloxSource, cloneDirName, clonePath, bloxFinalName } = await createBlox(
       availableName,

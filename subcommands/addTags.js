@@ -6,7 +6,7 @@ const { spinnies } = require('../loader')
 const { appConfig } = require('../utils/appconfigStore')
 
 const addTags = async (options) => {
-  appConfig.init()
+  await appConfig.init()
 
   const { all } = options
   const { dependencies } = appConfig.getAppConfig()

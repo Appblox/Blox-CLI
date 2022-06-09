@@ -27,6 +27,18 @@ function debounce(func, wait, immediate) {
     if (callNow) func.apply(context, args)
   }
 }
+/**
+ * Expects to find a webpack config at the given path, reads and returns port set in devServer or 300
+ * @param {String} dir Directory path to blox
+ * @returns {Number} Port Number
+ */
+const getPortFromWebpack = async (dir) => {
+  let wb = ''
+  // NOTE: Since webpack is mostly ESM, only way to import to
+  // CJS(this is CJS) is to use dynamic import, CAN'T USE REQUIRE
+  wb = await import(path.resolve(dir, 'webpack.config.js'))
+  return wb.default.devServer.port || 3000
+}
 class AppbloxConfigManager {
   constructor() {
     // eslint-disable-next-line no-bitwise
@@ -108,7 +120,6 @@ class AppbloxConfigManager {
   set stopBlox(bloxname) {
     const stop = {
       pid: null,
-      port: null,
       isOn: false,
     }
     this.liveDetails[bloxname] = { ...this.liveDetails[bloxname], ...stop }
@@ -126,7 +137,7 @@ class AppbloxConfigManager {
     this.events.emit('liveChanged')
   }
 
-  init(cwd, configName) {
+  async init(cwd, configName) {
     if (this.config) {
       return
     }
@@ -141,7 +152,7 @@ class AppbloxConfigManager {
       // console.log(this.config)
       // console.log('\n')
 
-      this.readLiveAppbloxConfig()
+      await this.readLiveAppbloxConfig()
       // console.log('Live Config Read:')
       // console.log(this.liveDetails)
       // console.log('\n')
@@ -163,7 +174,7 @@ class AppbloxConfigManager {
     }
   }
 
-  readLiveAppbloxConfig() {
+  async readLiveAppbloxConfig() {
     try {
       const existingLiveConfig = JSON.parse(readFileSync(path.resolve(this.cwd, this.liveConfigName)))
       for (const blox of this.dependencies) {
@@ -189,6 +200,10 @@ class AppbloxConfigManager {
           // console.log(
           //   `Existing live config doesn't have details of ${blox.meta.name}`
           // )
+          let p = 3000
+          if (this.isUiBlox(name)) {
+            p = await getPortFromWebpack(this.getBlox(name).directory)
+          }
           this.liveDetails[name] = {
             log: {
               out: `./logs/out/${name}.log`,
@@ -196,7 +211,7 @@ class AppbloxConfigManager {
             },
             isOn: false,
             pid: null,
-            port: null,
+            port: p,
           }
         }
       }
@@ -204,14 +219,19 @@ class AppbloxConfigManager {
       if (err.code === 'ENOENT') {
         console.log('Couldnt find live config')
         // throw new Error(`Couldnt find liveconfig file in ${this.cwd}`)
-        for (const bloxname of this.allBloxNames) {
+        for await (const bloxname of this.allBloxNames) {
+          let p = 3000
+          if (this.isUiBlox(bloxname)) {
+            p = await getPortFromWebpack(this.getBlox(bloxname).directory)
+          }
+          console.log(p)
           this.liveDetails[bloxname] = {
             log: {
               out: `./logs/out/${bloxname}.log`,
               err: `./logs/err/${bloxname}.log`,
             },
             isOn: false,
-            port: null,
+            port: p,
             pid: null,
           }
         }
@@ -430,6 +450,18 @@ class AppbloxConfigManager {
    */
   isLive(blox) {
     return this.liveDetails[blox].isOn
+  }
+
+  /**
+   * To check if a blox is a ui blox or not (Doesn't check for existence)
+   * @param {String} bloxname Name of blox to check if UI blox
+   * @returns {Boolean}
+   */
+  isUiBlox(bloxname) {
+    for (const blox of this.uiBloxes) {
+      if (blox.meta.name === bloxname) return true
+    }
+    return false
   }
 
   /**
