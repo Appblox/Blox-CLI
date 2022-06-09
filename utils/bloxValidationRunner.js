@@ -9,7 +9,7 @@ async function BloxValidationRunner(bloxPath, taskArray) {
     if (typeof fn !== 'function') throw new Error('Expexted task to be a function')
     await fn.apply(null, [appConfig, bloxConfig, cwd])
   }
-  appConfig.init()
+  await appConfig.init()
   const testDIrectory = appConfig.getBlox(appConfig.allBloxNames.next().value).directory
   console.log(testDIrectory)
   // const file = await readFile(`${testDIrectory}/src/todoInput.js`, { encoding: 'utf8' })

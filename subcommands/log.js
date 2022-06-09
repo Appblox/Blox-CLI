@@ -3,7 +3,7 @@ const path = require('path')
 const { appConfig } = require('../utils/appconfigStore')
 
 const log = async (bloxname) => {
-  appConfig.init()
+  await appConfig.init()
   if (!appConfig.has(bloxname)) {
     console.log('Blox Doesnt exists')
     return
