@@ -94,6 +94,7 @@ async function init() {
   program
     .command('start')
     .argument('[name]', 'Name of blox to start')
+    .option('--use-pnpm', 'use pnpm to install dependencies')
     .description('To start one or all bloxes')
     .action(start)
 

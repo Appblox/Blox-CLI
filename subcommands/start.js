@@ -10,6 +10,7 @@ const { getAbsPath } = require('../utils/path-helper')
 const emulateNode = require('./emulate')
 const { setupEnv } = require('../utils/env')
 const { appConfig } = require('../utils/appconfigStore')
+const { checkPnpm } = require('../utils/pnpmUtils')
 
 global.rootDir = process.cwd()
 
@@ -48,7 +49,20 @@ const watchCompilation = (fileName) =>
     })
   })
 const spinnies = new Spinnies()
-const start = async (bloxname) => {
+const start = async (bloxname, { usePnpm }) => {
+  global.usePnpm = false
+  if (!usePnpm) {
+    console.info('We recommend using pnpm for package management')
+    console.info('Start command might install dependencies before starting bloxes')
+    console.info('For faster blox start, pass --use-pnpm')
+  } else if (!checkPnpm()) {
+    console.info('Seems like pnpm is not installed')
+    console.warn(`pnpm is recommended`)
+    console.info(`Visit https://pnpm.io for more info`)
+  } else {
+    global.usePnpm = true
+  }
+
   await appConfig.init()
   // Setup env from appblox.config.json data
   const configData = appConfig.appConfig
@@ -206,7 +220,7 @@ async function startNodeProgram(blox, name, port) {
     const directory = getAbsPath(blox.directory)
     spinnies.update(name, { text: `Installing dependencies in ${name}` })
     // await runBash(blox.meta.postPull, directory)
-    const i = await runBash(blox.meta.postPull, path.resolve(blox.directory))
+    const i = await runBash(global.usePnpm ? 'pnpm install' : blox.meta.postPull, path.resolve(blox.directory))
     if (i.status === 'failed') {
       throw new Error(i.msg)
     }
@@ -242,7 +256,7 @@ async function startJsProgram(blox, name, port) {
     const directory = getAbsPath(blox.directory)
     spinnies.update(name, { text: `Installing dependencies in ${name}` })
     // const i = await runBash(blox.meta.postPull, directory)
-    const i = await runBash(blox.meta.postPull, path.resolve(blox.directory))
+    const i = await runBash(global.usePnpm ? 'pnpm install' : blox.meta.postPull, path.resolve(blox.directory))
     if (i.status === 'failed') {
       throw new Error(i.msg)
     }

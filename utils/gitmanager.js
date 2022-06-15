@@ -48,7 +48,7 @@ class GitManager {
     this.repository = reponame
     // this.token = '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:x-oauth-basic@github.com'
     this.token = configstore.get('gitPersonalAccessToken')
-    // this.remote = `https://${this.token}/${this.username}/${this.repository}.git`
+    this.remote = `https://${this.token}/${this.username}/${this.repository}.git`
     this._createRemote(url, ssh)
     // console.log(`${this.remote}is set as remote`)
   }
