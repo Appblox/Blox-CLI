@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Appblox. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 const cloneTr = ({ data }) => data.cloneTemplateRepository.repository
 const clone = `mutation($description:String, $templateRepo:ID!,$owner:ID!,$name:String!,$visibility:RepositoryVisibility!){
     cloneTemplateRepository(input: { description:$description, repositoryId: $templateRepo, name: $name, ownerId: $owner, visibility: $visibility}) {

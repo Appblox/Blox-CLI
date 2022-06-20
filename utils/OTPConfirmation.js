@@ -1,4 +1,11 @@
 /**
+ * Copyright (c) Appblox. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/**
  * To get confirmation from user once the provided 6 digit
  * code is entered into  https://github.com/login/device,
  *
