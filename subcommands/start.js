@@ -21,13 +21,13 @@ const { checkPnpm } = require('../utils/pnpmUtils')
 
 global.rootDir = process.cwd()
 
-const watchCompilation = (fileName) =>
+const watchCompilation = (logPath, errPath) =>
   new Promise((resolve, reject) => {
     let ERROR = false
     const report = { errors: [] }
     const outStream = new Stream()
-    watchFile(path.resolve(fileName), { persistent: false }, (currStat, prevStat) => {
-      const inStream = createReadStream(path.resolve(fileName), {
+    watchFile(path.resolve(logPath), { persistent: false }, (currStat, prevStat) => {
+      const inStream = createReadStream(path.resolve(logPath), {
         autoClose: false,
         encoding: 'utf8',
         start: prevStat.size,
@@ -48,6 +48,32 @@ const watchCompilation = (fileName) =>
       const onClose = () => {
         inStream.destroy()
         resolve(report)
+      }
+      const rl = readline.createInterface(inStream, outStream)
+      rl.on('line', onLine)
+      rl.on('error', onError)
+      rl.on('close', onClose)
+    })
+    watchFile(path.resolve(errPath), { persistent: false }, (currStat, prevStat) => {
+      const inStream = createReadStream(path.resolve(errPath), {
+        autoClose: false,
+        encoding: 'utf8',
+        start: prevStat.size,
+        end: currStat.size,
+      })
+      const onLine = (line) => {
+        if (line.includes('[webpack-cli]')) {
+          report.errors.push(line)
+        }
+      }
+      const onError = (err) => {
+        report.errors.push(err.message.split('\n')[0])
+        reject(report)
+      }
+      const onClose = () => {
+        inStream.destroy()
+        report.message = 'Webpack failed'
+        reject(report)
       }
       const rl = readline.createInterface(inStream, outStream)
       rl.on('line', onLine)
@@ -241,7 +267,7 @@ async function startNodeProgram(blox, name, port) {
     const childProcess = runBashLongRunning(startCommand, blox.log, directory)
     spinnies.update(name, { text: `Compiling ${name} ` })
     const updatedBlox = { name, pid: childProcess.pid, port, isOn: true }
-    const compilationReport = await watchCompilation(blox.log.out)
+    const compilationReport = await watchCompilation(blox.log.out, blox.log.err)
     spinnies.update(name, { text: `${name} Compiled with ${compilationReport.errors.length}  ` })
 
     const status = compilationReport.errors.length > 0 ? 'compiledwitherror' : 'success'
@@ -274,7 +300,7 @@ async function startJsProgram(blox, name, port) {
     const childProcess = runBashLongRunning(startCommand, blox.log, directory)
     spinnies.update(name, { text: `Compiling ${name} ` })
     const updatedBlox = { name, pid: childProcess.pid, port, isOn: true }
-    const compilationReport = await watchCompilation(blox.log.out)
+    const compilationReport = await watchCompilation(blox.log.out, blox.log.err)
     spinnies.update(name, { text: `${name} Compiled with ${compilationReport.errors.length}  ` })
 
     const status = compilationReport.errors.length > 0 ? 'compiledwitherror' : 'success'
