@@ -86,6 +86,10 @@ const preActionChecks = async (subcommand) => {
       break
 
     case 'init':
+      if (!isGitInstalled()) {
+        console.log('Git not installed')
+        process.exit(1)
+      }
       if (isInGitRepository()) {
         console.log('Already in a Git repository')
         process.exit(1)
