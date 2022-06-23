@@ -1,11 +1,11 @@
 /* eslint-disable */
-
+const { capitalize } = require('../../../utils/capitalize')
 const generateUiElementAppJs = (name) => `import React from 'react'
-import ${name} from './${name}'
+import ${capitalize(name)} from './${name}'
 export default function App() {
   return (
     <div>
-      <${name}/>
+      <${capitalize(name)}/>
     </div>
   )
 }
