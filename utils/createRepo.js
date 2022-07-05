@@ -103,7 +103,7 @@ async function createRepo(username, ownerId, ownerType, orgName, prefix, bloxSho
       spinnies.update('createRepo', { text: `checking name availability of ${checkThisName}` })
       // console.log(chalk.dim(`\nchecking name availability of ${checkThisName}\n`))
       bloxFinalName = checkThisName
-      const PREFIXED_BLOXNAME = `${clonePath !== '.' ? `_${prefix}_` : ``}${checkThisName}`
+      const PREFIXED_BLOXNAME = `${checkThisName}`
       // console.log(PREFIXED_BLOXNAME)
       const { data: innerData } = await axios.post(
         githubGraphQl,

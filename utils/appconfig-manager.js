@@ -144,12 +144,13 @@ class AppbloxConfigManager {
     this.events.emit('liveChanged')
   }
 
-  async init(cwd, configName) {
+  async init(cwd, configName, subcmd) {
     if (this.config) {
       return
     }
     this.configName = configName || 'appblox.config.json'
     this.cwd = cwd || '.'
+    this.subcmd = subcmd || null
 
     // console.log(path.resolve(this.cwd, this.configName))
 
@@ -164,8 +165,12 @@ class AppbloxConfigManager {
       // console.log(this.liveDetails)
       // console.log('\n')
     } catch (err) {
-      console.log(err.message)
-      process.exit(1)
+      if (this.subcmd === 'create') {
+        throw err
+      } else {
+        console.log(err.message)
+        process.exit(1)
+      }
     }
   }
 

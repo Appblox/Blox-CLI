@@ -51,7 +51,7 @@ class GitManager {
     this.cwd = cwd
     this.ssh = ssh || false
     this.source = `${url}.git`
-    this.username = 'Digambaran'
+    this.username = configstore.get('githubUserName')
     this.repository = reponame
     // this.token = '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:x-oauth-basic@github.com'
     this.token = configstore.get('gitPersonalAccessToken')
@@ -66,7 +66,7 @@ class GitManager {
    * @param {String} url
    */
   _createRemote(url, ssh) {
-    this.remote = ssh ? url : url.replace('//github.com', `//${this.token}`)
+    this.remote = ssh ? url : url.replace('//github.com', `//${this.token}:x-oauth-basic@github.com`)
   }
 
   /* ********************************

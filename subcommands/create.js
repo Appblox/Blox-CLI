@@ -19,6 +19,7 @@ const {
   // getBloxShortName,
   getBloxName,
   getGitConfigNameEmail,
+  confirmationPrompt,
 } = require('../utils/questionPrompts')
 const { bloxTypeInverter } = require('../utils/bloxTypeInverter')
 const { checkAndSetGitConfigNameEmail } = require('../utils/gitCheckUtils')
@@ -69,6 +70,7 @@ const { configstore } = require('../configstore')
  * @returns
  */
 const create = async (userPassedName, options, _, returnBeforeCreatingTemplates, cwd) => {
+  let standAloneBlox = false
   let componentName = userPassedName
   const regex = /^[a-zA-Z-_0-9]+$/
   let { type } = options
@@ -90,7 +92,19 @@ const create = async (userPassedName, options, _, returnBeforeCreatingTemplates,
     // logger.info(
     //   `${componentName} checked against registry and ${availableName} is finalized`
     // )
-    await appConfig.init()
+    try {
+      await appConfig.init(null, null, 'create')
+    } catch (err) {
+      console.log(err.message)
+      const goAhead = await confirmationPrompt({
+        message: 'You are trying to create a blox outside appblox context',
+        name: 'seperateBloxCreate',
+      })
+      if (!goAhead) {
+        process.exit(1)
+      }
+      standAloneBlox = true
+    }
     // const shortName = await getBloxShortName(availableName)
     const { bloxSource, cloneDirName, clonePath, bloxFinalName } = await createBlox(
       availableName,
@@ -98,7 +112,8 @@ const create = async (userPassedName, options, _, returnBeforeCreatingTemplates,
       type,
       '',
       false,
-      cwd || '.'
+      cwd || '.',
+      true
     )
 
     // logger.info(`${componentName} created and registered as ${availableName}`)
@@ -118,6 +133,7 @@ const create = async (userPassedName, options, _, returnBeforeCreatingTemplates,
       start: 'npx webpack-dev-server',
       build: 'npx webpack',
       postPull: 'npm i',
+      standAloneBlox,
     }
     // execSync(`cd ${cloneDirName}`)
     createFileSync(path.resolve(clonePath, cloneDirName, `blox.config.json`), bloxDetails)
@@ -135,10 +151,12 @@ const create = async (userPassedName, options, _, returnBeforeCreatingTemplates,
 
     if (returnBeforeCreatingTemplates) return { clonePath, cloneDirName, bloxDetails }
 
-    appConfig.addBlox({
-      directory: path.relative('.', path.resolve(clonePath, cloneDirName)),
-      meta: JSON.parse(readFileSync(path.resolve(clonePath, cloneDirName, 'blox.config.json'))),
-    })
+    if (!standAloneBlox) {
+      appConfig.addBlox({
+        directory: path.relative('.', path.resolve(clonePath, cloneDirName)),
+        meta: JSON.parse(readFileSync(path.resolve(clonePath, cloneDirName, 'blox.config.json'))),
+      })
+    }
 
     // This is a temp setup
     // This is to avoid pushing empty repo, which will cause issues on
