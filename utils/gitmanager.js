@@ -93,6 +93,10 @@ class GitManager {
     return this._run('checkout', [name])
   }
 
+  cd(directoryPath) {
+    this.cwd = directoryPath
+  }
+
   /* ********************************
    *************** F ****************
    ******************************** */
