@@ -139,7 +139,7 @@ const create = async (userPassedName, options, _, returnBeforeCreatingTemplates,
       }
     } else {
       // const shortName = await getBloxShortName(availableName)
-      const d = await createBlox(availableName, availableName, type, '', false, cwd || '.', true)
+      const d = await createBlox(availableName, availableName, type, '', false, cwd || '.', standAloneBlox)
       bloxFinalName = d.bloxFinalName
       bloxSource = d.bloxSource
       cloneDirName = d.cloneDirName

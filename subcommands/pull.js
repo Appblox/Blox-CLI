@@ -122,7 +122,7 @@ const pull = async (componentName, { cwd = '.' }) => {
         true,
         cwd
       )
-      const localDirName = `_${appConfig.prefix}_${metaData.BloxName}`
+      const localDirName = `${metaData.BloxName}`
 
       const prefersSsh = configstore.get('prefersSsh')
       const originUrl = prefersSsh ? metaData.GitUrl : convertGitSshUrlToHttps(metaData.GitUrl)

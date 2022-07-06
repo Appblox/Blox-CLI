@@ -15,7 +15,6 @@ const chalk = require('chalk')
 const { createFileSync, createDirForType, ensureDirSync, isDirEmpty } = require('../utils/fileAndFolderHelpers')
 const {
   getBloxName,
-  getPrefix,
   setWithTemplate,
   wantToCreateNewVersion,
   wouldLikeToRegisterTemplateBloxesAsNewBlox,
@@ -122,10 +121,10 @@ const Init = async (appbloxName) => {
 
   if (!useTemplate) return
 
-  if (!appConfig.prefix) {
-    const prefix = await getPrefix(componentName)
-    appConfig.prefix = prefix
-  }
+  // if (!appConfig.prefix) {
+  //   const prefix = await getPrefix(componentName)
+  //   appConfig.prefix = prefix
+  // }
 
   const fastForward = await wouldLikeToRegisterTemplateBloxesAsNewBlox()
 
@@ -144,7 +143,7 @@ const Init = async (appbloxName) => {
         const bloxData = config.dependencies[blox]
         const bloxMeta = { ...bloxData.meta }
         // console.log(bloxMeta)
-        localDirName = `_${appConfig.prefix}_${bloxMeta.name}`
+        localDirName = `${bloxMeta.name}`
         let p = createDirForType(bloxTypeInverter(bloxMeta.type), DIRPATH)
 
         const createCustomVersion = fastForward && (await wantToCreateNewVersion(bloxMeta.name))
