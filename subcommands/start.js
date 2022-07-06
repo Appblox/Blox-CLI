@@ -68,7 +68,7 @@ const watchCompilation = (logPath, errPath) =>
       }
       const onError = (err) => {
         report.errors.push(err.message.split('\n')[0])
-        reject(report)
+        resolve(report)
       }
       const onClose = () => {
         inStream.destroy()
