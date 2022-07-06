@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 
+/**
+ * Copyright (c) Appblox. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 const inquirer = require('inquirer')
 // const chalk = require('chalk')
 const inquirerFileTree = require('inquirer-file-tree-selection-prompt')
@@ -94,6 +101,7 @@ async function init() {
   program
     .command('start')
     .argument('[name]', 'Name of blox to start')
+    .option('--use-pnpm', 'use pnpm to install dependencies')
     .description('To start one or all bloxes')
     .action(start)
 

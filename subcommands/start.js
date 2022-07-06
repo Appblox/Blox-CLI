@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Appblox. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 const Spinnies = require('spinnies')
 const { createReadStream, watchFile } = require('fs')
 const { Stream } = require('stream')
@@ -10,16 +17,17 @@ const { getAbsPath } = require('../utils/path-helper')
 const emulateNode = require('./emulate')
 const { setupEnv } = require('../utils/env')
 const { appConfig } = require('../utils/appconfigStore')
+const { checkPnpm } = require('../utils/pnpmUtils')
 
 global.rootDir = process.cwd()
 
-const watchCompilation = (fileName) =>
+const watchCompilation = (logPath, errPath) =>
   new Promise((resolve, reject) => {
     let ERROR = false
     const report = { errors: [] }
     const outStream = new Stream()
-    watchFile(path.resolve(fileName), { persistent: false }, (currStat, prevStat) => {
-      const inStream = createReadStream(path.resolve(fileName), {
+    watchFile(path.resolve(logPath), { persistent: false }, (currStat, prevStat) => {
+      const inStream = createReadStream(path.resolve(logPath), {
         autoClose: false,
         encoding: 'utf8',
         start: prevStat.size,
@@ -46,9 +54,48 @@ const watchCompilation = (fileName) =>
       rl.on('error', onError)
       rl.on('close', onClose)
     })
+    watchFile(path.resolve(errPath), { persistent: false }, (currStat, prevStat) => {
+      const inStream = createReadStream(path.resolve(errPath), {
+        autoClose: false,
+        encoding: 'utf8',
+        start: prevStat.size,
+        end: currStat.size,
+      })
+      const onLine = (line) => {
+        if (line.includes('[webpack-cli]')) {
+          report.errors.push(line)
+        }
+      }
+      const onError = (err) => {
+        report.errors.push(err.message.split('\n')[0])
+        reject(report)
+      }
+      const onClose = () => {
+        inStream.destroy()
+        report.message = 'Webpack failed'
+        reject(report)
+      }
+      const rl = readline.createInterface(inStream, outStream)
+      rl.on('line', onLine)
+      rl.on('error', onError)
+      rl.on('close', onClose)
+    })
   })
 const spinnies = new Spinnies()
-const start = async (bloxname) => {
+const start = async (bloxname, { usePnpm }) => {
+  global.usePnpm = false
+  if (!usePnpm) {
+    console.info('We recommend using pnpm for package management')
+    console.info('Start command might install dependencies before starting bloxes')
+    console.info('For faster blox start, pass --use-pnpm')
+  } else if (!checkPnpm()) {
+    console.info('Seems like pnpm is not installed')
+    console.warn(`pnpm is recommended`)
+    console.info(`Visit https://pnpm.io for more info`)
+  } else {
+    global.usePnpm = true
+  }
+
   await appConfig.init()
   // Setup env from appblox.config.json data
   const configData = appConfig.appConfig
@@ -206,7 +253,7 @@ async function startNodeProgram(blox, name, port) {
     const directory = getAbsPath(blox.directory)
     spinnies.update(name, { text: `Installing dependencies in ${name}` })
     // await runBash(blox.meta.postPull, directory)
-    const i = await runBash(blox.meta.postPull, path.resolve(blox.directory))
+    const i = await runBash(global.usePnpm ? 'pnpm install' : blox.meta.postPull, path.resolve(blox.directory))
     if (i.status === 'failed') {
       throw new Error(i.msg)
     }
@@ -220,7 +267,7 @@ async function startNodeProgram(blox, name, port) {
     const childProcess = runBashLongRunning(startCommand, blox.log, directory)
     spinnies.update(name, { text: `Compiling ${name} ` })
     const updatedBlox = { name, pid: childProcess.pid, port, isOn: true }
-    const compilationReport = await watchCompilation(blox.log.out)
+    const compilationReport = await watchCompilation(blox.log.out, blox.log.err)
     spinnies.update(name, { text: `${name} Compiled with ${compilationReport.errors.length}  ` })
 
     const status = compilationReport.errors.length > 0 ? 'compiledwitherror' : 'success'
@@ -242,7 +289,7 @@ async function startJsProgram(blox, name, port) {
     const directory = getAbsPath(blox.directory)
     spinnies.update(name, { text: `Installing dependencies in ${name}` })
     // const i = await runBash(blox.meta.postPull, directory)
-    const i = await runBash(blox.meta.postPull, path.resolve(blox.directory))
+    const i = await runBash(global.usePnpm ? 'pnpm install' : blox.meta.postPull, path.resolve(blox.directory))
     if (i.status === 'failed') {
       throw new Error(i.msg)
     }
@@ -253,7 +300,7 @@ async function startJsProgram(blox, name, port) {
     const childProcess = runBashLongRunning(startCommand, blox.log, directory)
     spinnies.update(name, { text: `Compiling ${name} ` })
     const updatedBlox = { name, pid: childProcess.pid, port, isOn: true }
-    const compilationReport = await watchCompilation(blox.log.out)
+    const compilationReport = await watchCompilation(blox.log.out, blox.log.err)
     spinnies.update(name, { text: `${name} Compiled with ${compilationReport.errors.length}  ` })
 
     const status = compilationReport.errors.length > 0 ? 'compiledwitherror' : 'success'

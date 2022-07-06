@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Appblox. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 /* eslint-disable no-async-promise-executor */
 const { readFileSync, writeFile } = require('fs')
 const path = require('path')
@@ -137,12 +144,13 @@ class AppbloxConfigManager {
     this.events.emit('liveChanged')
   }
 
-  async init(cwd, configName) {
+  async init(cwd, configName, subcmd) {
     if (this.config) {
       return
     }
     this.configName = configName || 'appblox.config.json'
     this.cwd = cwd || '.'
+    this.subcmd = subcmd || null
 
     // console.log(path.resolve(this.cwd, this.configName))
 
@@ -157,8 +165,12 @@ class AppbloxConfigManager {
       // console.log(this.liveDetails)
       // console.log('\n')
     } catch (err) {
-      console.log(err.message)
-      process.exit(1)
+      if (this.subcmd === 'create') {
+        throw err
+      } else {
+        console.log(err.message)
+        process.exit(1)
+      }
     }
   }
 

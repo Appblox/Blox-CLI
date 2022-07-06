@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Appblox. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 const { exec } = require('child_process')
 const { configstore } = require('../configstore')
 const { GitError } = require('./errors/gitError')
@@ -44,11 +51,11 @@ class GitManager {
     this.cwd = cwd
     this.ssh = ssh || false
     this.source = `${url}.git`
-    this.username = 'Digambaran'
+    this.username = configstore.get('githubUserName')
     this.repository = reponame
     // this.token = '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:x-oauth-basic@github.com'
     this.token = configstore.get('gitPersonalAccessToken')
-    // this.remote = `https://${this.token}/${this.username}/${this.repository}.git`
+    this.remote = `https://${this.token}/${this.username}/${this.repository}.git`
     this._createRemote(url, ssh)
     // console.log(`${this.remote}is set as remote`)
   }
@@ -59,7 +66,7 @@ class GitManager {
    * @param {String} url
    */
   _createRemote(url, ssh) {
-    this.remote = ssh ? url : url.replace('//github.com', `//${this.token}`)
+    this.remote = ssh ? url : url.replace('//github.com', `//${this.token}:x-oauth-basic@github.com`)
   }
 
   /* ********************************

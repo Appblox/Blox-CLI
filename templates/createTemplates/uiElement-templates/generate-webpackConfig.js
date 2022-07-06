@@ -56,7 +56,7 @@ export default {
       'process.env': JSON.stringify(process.env),
     }),
     new ModuleFederationPlugin({
-      name: ${name},
+      name: '${name}',
       filename: 'remoteEntry.js',
       exposes: {
         './${name}': './src/${name}',

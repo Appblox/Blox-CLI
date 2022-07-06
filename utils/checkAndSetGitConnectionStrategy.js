@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Appblox. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 const chalk = require('chalk')
 const { exec } = require('child_process')
 const { configstore } = require('../configstore')
@@ -55,7 +62,7 @@ async function getConnectionStrategyPreference() {
 }
 async function getAndSetGitPat() {
   const token = await readInput({ message: 'Drop PAT here..', name: 'gitPat' })
-  await configstore.set('gitPersonalAccessToken', `${token.trim()}@github.com`)
+  await configstore.set('gitPersonalAccessToken', `${token.trim()}`)
 }
 /**
  * TODO -- this is repeated in createRepo

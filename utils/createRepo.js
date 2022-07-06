@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Appblox. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 const inquirer = require('inquirer')
 const axios = require('axios')
 const chalk = require('chalk')
@@ -96,7 +103,7 @@ async function createRepo(username, ownerId, ownerType, orgName, prefix, bloxSho
       spinnies.update('createRepo', { text: `checking name availability of ${checkThisName}` })
       // console.log(chalk.dim(`\nchecking name availability of ${checkThisName}\n`))
       bloxFinalName = checkThisName
-      const PREFIXED_BLOXNAME = `${clonePath !== '.' ? `_${prefix}_` : ``}${checkThisName}`
+      const PREFIXED_BLOXNAME = `${checkThisName}`
       // console.log(PREFIXED_BLOXNAME)
       const { data: innerData } = await axios.post(
         githubGraphQl,

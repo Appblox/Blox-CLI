@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Appblox. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 const path = require('path')
 const axios = require('axios')
 const { readFileSync, writeFileSync } = require('fs')
@@ -15,6 +22,7 @@ const convertGitSshUrlToHttps = require('../utils/convertGitUrl')
 const { configstore } = require('../configstore')
 const { GitManager } = require('../utils/gitmanager')
 const { runBash } = require('./bash')
+const { checkPnpm } = require('../utils/pnpmUtils')
 
 const pull = async (componentName, { cwd = '.' }) => {
   // Pull must happen only inside an appBlox
@@ -183,8 +191,18 @@ const pull = async (componentName, { cwd = '.' }) => {
   // RUN the post pull script here
   // execSync(`cd ${pulledBloxPath} `)
   // TODO: use pnpm
-  spinnies.add('npmi', { text: 'Installing dependencies' })
-  const ireport = await runBash('npm i', pulledBloxPath)
+
+  spinnies.add('npmi', { text: 'Checking for pnpm binary' })
+  let usePnpm = false
+  if (checkPnpm()) {
+    usePnpm = true
+  } else {
+    spinnies.update('npmi', { text: 'pnpm is not installed', status: 'stopped' })
+    console.log(`pnpm is recommended`)
+    console.log(`Visit https://pnpm.io for more info`)
+  }
+  spinnies.add('npmi', { text: `Installing dependencies with ${usePnpm ? `pnpm` : 'npm'}` })
+  const ireport = await runBash(usePnpm ? `pnpm install` : 'npm i', pulledBloxPath)
   if (ireport.status === 'failed') {
     spinnies.fail('npmi', { text: ireport.msg })
   } else {

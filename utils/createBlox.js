@@ -1,16 +1,22 @@
+/**
+ * Copyright (c) Appblox. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 const chalk = require('chalk')
 // const { execSync } = require('child_process')
 const { readFileSync, writeFileSync } = require('fs')
 const path = require('path')
 const { configstore } = require('../configstore')
-const { appConfig } = require('./appconfigStore')
 const { bloxTypeInverter } = require('./bloxTypeInverter')
 const convertGitSshUrlToHttps = require('./convertGitUrl')
 const createComponent = require('./createComponent')
 const { createDirForType } = require('./fileAndFolderHelpers')
 const { GitManager } = require('./gitmanager')
 // const { tryGitInit } = require('./gitCheckUtils')
-const { getPrefix, getGitConfigNameEmail } = require('./questionPrompts')
+const { getGitConfigNameEmail } = require('./questionPrompts')
 const registerBlox = require('./registerBlox')
 
 /**
@@ -30,6 +36,7 @@ const registerBlox = require('./registerBlox')
  * @param {String} createFromExistinURL If a source is provided, a new repo is created from the source IMP:always should be ssh url
  * @param {Boolean} callingFromPullNoCreateNewRefactorMelater To stop halfway and return cloned directory path
  * @param {String} cwd To pass to directory creation function
+ * @param {String} isAStandAloneBlox If user is trying to create a blox outside appblox context
  * @returns {returnObject}
  */
 async function createBlox(
@@ -38,10 +45,14 @@ async function createBlox(
   bloxTypeNo,
   createFromExistinURL,
   callingFromPullNoCreateNewRefactorMelater,
-  cwd
+  cwd,
+  isAStandAloneBlox = false
 ) {
-  if (arguments.length !== 6) throw new Error('NotEnoughArguments in CreateBlox')
+  if (arguments.length < 6) throw new Error('NotEnoughArguments in CreateBlox')
 
+  /**
+   * PREFIX IS NO LONGER NECESSARY
+   * 
   const presentPrefix = appConfig.prefix
   if (!presentPrefix && bloxTypeNo > 1) {
     // If we are here from init, then appblox.config.json would not have been
@@ -50,12 +61,14 @@ async function createBlox(
     const prefix = await getPrefix(appConfig.getName())
     appConfig.prefix = prefix
   }
+  *
+  */
 
   // if (!tryGitInit()) {
   //   throw new Error('Git not initialized')
   // }
 
-  const clonePath = createDirForType(bloxTypeNo, cwd || '.')
+  const clonePath = isAStandAloneBlox ? '.' : createDirForType(bloxTypeNo, cwd || '.')
   // console.log('clone path return from createDirForType', clonePath)
   if (callingFromPullNoCreateNewRefactorMelater) {
     return { clonePath }

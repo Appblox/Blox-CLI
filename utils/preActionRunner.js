@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Appblox. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 const { ensureUserLogins } = require('./ensureUserLogins')
 const { isInGitRepository, isGitInstalled } = require('./gitCheckUtils')
 const { checkLogDirs } = require('./preActionMethods/preAction-start')
@@ -79,6 +86,10 @@ const preActionChecks = async (subcommand) => {
       break
 
     case 'init':
+      if (!isGitInstalled()) {
+        console.log('Git not installed')
+        process.exit(1)
+      }
       if (isInGitRepository()) {
         console.log('Already in a Git repository')
         process.exit(1)
