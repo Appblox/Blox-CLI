@@ -68,12 +68,12 @@ const watchCompilation = (logPath, errPath) =>
       }
       const onError = (err) => {
         report.errors.push(err.message.split('\n')[0])
-        resolve(report)
+        reject(report)
       }
       const onClose = () => {
         inStream.destroy()
         report.message = 'Webpack failed'
-        reject(report)
+        resolve(report)
       }
       const rl = readline.createInterface(inStream, outStream)
       rl.on('line', onLine)
