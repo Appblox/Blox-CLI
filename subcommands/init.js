@@ -267,6 +267,8 @@ const Init = async (appbloxName) => {
 
                       return arrayOfFiles
                     })(DIRPATH, [])
+
+                    delete fnNameChanges[v]
                   }
                 })
                 break
