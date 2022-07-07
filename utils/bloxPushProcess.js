@@ -26,7 +26,7 @@ const start = async ({ bloxName, bloxPath, bloxSource, commitMessage, gitUserNam
     // setup GitManager
     const prefersSsh = configstore.get('prefersSsh')
     const repoUrl = prefersSsh ? bloxSource.ssh : convertGitSshUrlToHttps(bloxSource.ssh)
-    const Git = new GitManager(bloxPath, 'Not very imp', repoUrl, prefersSsh)
+    const Git = new GitManager(bloxPath, bloxName, repoUrl, prefersSsh)
 
     // ------------------------------------------ //
 

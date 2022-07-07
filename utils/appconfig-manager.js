@@ -243,7 +243,7 @@ class AppbloxConfigManager {
           if (this.isUiBlox(bloxname)) {
             p = await getPortFromWebpack(this.getBlox(bloxname).directory)
           }
-          console.log(p)
+          // console.log(p)
           this.liveDetails[bloxname] = {
             log: {
               out: `./logs/out/${bloxname}.log`,

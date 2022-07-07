@@ -174,7 +174,7 @@ const Init = async (appbloxName) => {
 
         try {
           ensureDirSync(path.resolve(p, localDirName))
-          execSync(`cp -a -R -n ${path.join(templatesPath, bloxData.directory)}/. ${path.resolve(p, localDirName)}`)
+          execSync(`cp -r ${path.join(templatesPath, bloxData.directory)}/. ${path.resolve(p, localDirName)}`)
           if (createCustomVersion) {
             switch (bloxMeta.type) {
               case 'ui-elements':
@@ -389,6 +389,18 @@ const Init = async (appbloxName) => {
               ...bloxMeta,
             },
           })
+
+          if (createCustomVersion) {
+            await checkAndSetGitConfigNameEmail(path.resolve(p, localDirName))
+
+            // Push the templates changes here
+            Git.cd(path.resolve(p, localDirName))
+            Git._createRemote(prefersSsh ? bloxMeta.source.ssh : bloxMeta.source.https, prefersSsh)
+            await Git.newBranch('main')
+            await Git.stageAll()
+            await Git.commit('initial commit')
+            await Git.push('main')
+          }
         } catch (err) {
           console.log(err)
           console.log('Something went wrong while bootstrapping ', bloxMeta.name)
