@@ -282,6 +282,25 @@ function createDirForType(type, cwd) {
   }
   return dirPath
 }
+/**
+ *
+ * @param {String} dirname
+ * @param  {...any} acceptedItems List of accepted file or folder names
+ * @returns {Boolean}
+ */
+function isDirEmpty(dirname, ...acceptedItems) {
+  return fs.promises.readdir(dirname).then((files) => {
+    console.log(acceptedItems)
+    console.log(files)
+    if (files.length === 0) {
+      return true
+    }
+    if (files.some((item) => !acceptedItems.includes(item))) {
+      return false
+    }
+    return true
+  })
+}
 
 module.exports = {
   ensureDirSync,
@@ -294,4 +313,5 @@ module.exports = {
   ensureReadMeIsPresent,
   uploadReadMe,
   createDirForType,
+  isDirEmpty,
 }

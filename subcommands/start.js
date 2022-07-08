@@ -73,7 +73,7 @@ const watchCompilation = (logPath, errPath) =>
       const onClose = () => {
         inStream.destroy()
         report.message = 'Webpack failed'
-        reject(report)
+        resolve(report)
       }
       const rl = readline.createInterface(inStream, outStream)
       rl.on('line', onLine)
@@ -140,7 +140,12 @@ async function startAllBlox() {
       break
   }
   if (emData.status === 'success') {
+    const pary = []
     for (const fnBlox of appConfig.fnBloxes) {
+      pary.push(runBash(global.usePnpm ? 'pnpm install' : fnBlox.meta.postPull, path.resolve(fnBlox.directory)))
+      // if (i.status === 'failed') {
+      //   throw new Error(i.msg)
+      // }
       appConfig.startedBlox = {
         name: fnBlox.meta.name,
         pid: emData.data.pid || null,
@@ -152,6 +157,8 @@ async function startAllBlox() {
         },
       }
     }
+    await Promise.allSettled(pary)
+    // console.log(rep)
     spinnies.succeed('emulator', { text: `emulator started at ${emData.data.port}` })
   } else {
     spinnies.fail('emulator', { text: `emulator failed to start ${chalk.gray(`(${emData.msg})`)}` })

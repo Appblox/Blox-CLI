@@ -11,13 +11,15 @@ const { readFile, writeFile, rename } = require('fs/promises')
 const { readFileSync, writeFileSync, renameSync, readdirSync, statSync } = require('fs')
 // const { readFileSync } = require('fs')
 const path = require('path')
-const { createFileSync, createDirForType, ensureDirSync } = require('../utils/fileAndFolderHelpers')
+const chalk = require('chalk')
+const { createFileSync, createDirForType, ensureDirSync, isDirEmpty } = require('../utils/fileAndFolderHelpers')
 const {
   getBloxName,
-  getPrefix,
   setWithTemplate,
   wantToCreateNewVersion,
   wouldLikeToRegisterTemplateBloxesAsNewBlox,
+  sourceUrlOptions,
+  readInput,
 } = require('../utils/questionPrompts')
 const createBlox = require('../utils/createBlox')
 const { bloxTypeInverter } = require('../utils/bloxTypeInverter')
@@ -28,6 +30,7 @@ const { appConfig } = require('../utils/appconfigStore')
 const create = require('./create')
 const { configstore } = require('../configstore')
 const { GitManager } = require('../utils/gitmanager')
+const convertGitSshUrlToHttps = require('../utils/convertGitUrl')
 
 const Init = async (appbloxName) => {
   const templatesPath = path.join(__dirname, '..', 'templates', 'appblox_todo_template_test')
@@ -39,12 +42,54 @@ const Init = async (appbloxName) => {
 
   const availableName = await checkBloxNameAvailability(componentName)
 
-  // const shortName = await getBloxShortName(availableName)
-  // const { bloxSource, cloneDirName, clonePath, bloxFinalName } =
-  const { bloxFinalName, bloxSource } = await createBlox(availableName, availableName, 1, '', false, '.')
+  // Check if github user name or id is not set (we need both, if either is not set inform)
+  const u = configstore.get('githubUserId', '')
+  const t = configstore.get('githubUserToken', '')
+
+  // If user is giving a url then no chance of changing this name
+  let bloxFinalName = availableName
+  let bloxSource
+  let userHasProvidedRepoUrl = false
+
+  if (u === '' || t === '') {
+    console.log(`${chalk.bgCyan('INFO')}:Seems like you have not connected to any version manager`)
+    const o = await sourceUrlOptions()
+    // 0 for cancel
+    // 2 for go to connect
+    // 3 for let me provide url
+    if (o === 0) process.exit(1)
+    else if (o === 2) {
+      // INFO connecting to github from here might cause the same token in memory issue
+      console.log('Cant do it now!')
+    } else {
+      const s = await readInput({ message: 'Enter source ssh url here', name: 'sUrl' })
+      bloxSource = { ssh: s.trim(), https: convertGitSshUrlToHttps(s.trim()) }
+      userHasProvidedRepoUrl = true
+    }
+  } else {
+    // const shortName = await getBloxShortName(availableName)
+    // const { bloxSource, cloneDirName, clonePath, bloxFinalName } =
+    const d = await createBlox(availableName, availableName, 1, '', false, '.')
+    bloxFinalName = d.bloxFinalName
+    bloxSource = d.bloxSource
+  }
 
   const [dir] = [bloxFinalName]
   const DIRPATH = path.resolve(dir)
+
+  const prefersSsh = configstore.get('prefersSsh')
+  const originUrl = prefersSsh ? bloxSource.ssh : bloxSource.https
+  // INFO - Git is set in current directory, it could be having other git, might cause issue
+  //        user is adviced to run in a new directory
+  const Git = new GitManager('.', bloxFinalName, originUrl, prefersSsh)
+  if (userHasProvidedRepoUrl) {
+    await Git.clone(DIRPATH)
+    const emptyDir = await isDirEmpty(DIRPATH, '.git')
+    if (!emptyDir) {
+      console.log(`${chalk.bgRed('ERROR')}: Expected to find an empty repo`)
+      process.exit(1)
+    }
+  }
 
   const CONFIGPATH = path.join(DIRPATH, 'appblox.config.json')
   createFileSync(CONFIGPATH, {
@@ -64,13 +109,10 @@ const Init = async (appbloxName) => {
   //   { cwd: path.resolve(bloxFinalName) }
   // )
 
-  const prefersSsh = configstore.get('prefersSsh')
-  const originUrl = prefersSsh ? bloxSource.ssh : bloxSource.https
-  const Git = new GitManager(path.resolve(bloxFinalName), bloxFinalName, originUrl, prefersSsh)
-
+  Git.cd(path.resolve(bloxFinalName)) // Change to git directory
   await Git.newBranch('main')
   await Git.stageAll()
-  await Git.commit('initial commit')
+  await Git.commit('initial app commit')
   await Git.push('main')
 
   appConfig.init(path.resolve(bloxFinalName))
@@ -79,10 +121,10 @@ const Init = async (appbloxName) => {
 
   if (!useTemplate) return
 
-  if (!appConfig.prefix) {
-    const prefix = await getPrefix(componentName)
-    appConfig.prefix = prefix
-  }
+  // if (!appConfig.prefix) {
+  //   const prefix = await getPrefix(componentName)
+  //   appConfig.prefix = prefix
+  // }
 
   const fastForward = await wouldLikeToRegisterTemplateBloxesAsNewBlox()
 
@@ -101,7 +143,7 @@ const Init = async (appbloxName) => {
         const bloxData = config.dependencies[blox]
         const bloxMeta = { ...bloxData.meta }
         // console.log(bloxMeta)
-        localDirName = `_${appConfig.prefix}_${bloxMeta.name}`
+        localDirName = `${bloxMeta.name}`
         let p = createDirForType(bloxTypeInverter(bloxMeta.type), DIRPATH)
 
         const createCustomVersion = fastForward && (await wantToCreateNewVersion(bloxMeta.name))

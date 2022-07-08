@@ -13,13 +13,15 @@ const { readFileSync, writeFileSync, mkdirSync } = require('fs')
 const chalk = require('chalk')
 const checkBloxNameAvailability = require('../utils/checkBloxNameAvailability')
 const createBlox = require('../utils/createBlox')
-const { createFileSync } = require('../utils/fileAndFolderHelpers')
+const { createFileSync, createDirForType, isDirEmpty } = require('../utils/fileAndFolderHelpers')
 const {
   getBloxType,
   // getBloxShortName,
   getBloxName,
   getGitConfigNameEmail,
   confirmationPrompt,
+  readInput,
+  sourceUrlOptions,
 } = require('../utils/questionPrompts')
 const { bloxTypeInverter } = require('../utils/bloxTypeInverter')
 const { checkAndSetGitConfigNameEmail } = require('../utils/gitCheckUtils')
@@ -52,6 +54,7 @@ const {
 } = require('../templates/createTemplates/uiElement-templates')
 const { GitManager } = require('../utils/gitmanager')
 const { configstore } = require('../configstore')
+const convertGitSshUrlToHttps = require('../utils/convertGitUrl')
 
 // logger.add(new transports.File({ filename: 'create.log' }))
 
@@ -105,16 +108,43 @@ const create = async (userPassedName, options, _, returnBeforeCreatingTemplates,
       }
       standAloneBlox = true
     }
-    // const shortName = await getBloxShortName(availableName)
-    const { bloxSource, cloneDirName, clonePath, bloxFinalName } = await createBlox(
-      availableName,
-      availableName,
-      type,
-      '',
-      false,
-      cwd || '.',
-      true
-    )
+
+    // Check if github user name or id is not set (we need both, if either is not set inform)
+    const u = configstore.get('githubUserId', '')
+    const t = configstore.get('githubUserToken', '')
+
+    // If user is giving a url then no chance of changing this name
+    let bloxFinalName = availableName
+    let bloxSource
+    let cloneDirName
+    let clonePath
+    let userHasProvidedRepoUrl = false
+
+    if (u === '' || t === '') {
+      console.log(`${chalk.bgCyan('INFO')}:Seems like you have not connected to any version manager`)
+      const o = await sourceUrlOptions()
+      // 0 for cancel
+      // 2 for go to connect
+      // 3 for let me provide url
+      if (o === 0) process.exit(1)
+      else if (o === 2) {
+        // INFO connecting to github from here might cause the same token in memory issue
+        console.log('Cant do it now!')
+      } else {
+        const s = await readInput({ message: 'Enter source ssh url here', name: 'sUrl' })
+        bloxSource = { ssh: s.trim(), https: convertGitSshUrlToHttps(s.trim()) }
+        userHasProvidedRepoUrl = true
+        clonePath = standAloneBlox ? '.' : createDirForType(type, cwd || '.')
+        cloneDirName = bloxFinalName
+      }
+    } else {
+      // const shortName = await getBloxShortName(availableName)
+      const d = await createBlox(availableName, availableName, type, '', false, cwd || '.', standAloneBlox)
+      bloxFinalName = d.bloxFinalName
+      bloxSource = d.bloxSource
+      cloneDirName = d.cloneDirName
+      clonePath = d.clonePath
+    }
 
     // logger.info(`${componentName} created and registered as ${availableName}`)
 
@@ -122,6 +152,22 @@ const create = async (userPassedName, options, _, returnBeforeCreatingTemplates,
     // logger.info(`cloneDirName - ${cloneDirName}`)
     // logger.info(`clonePath - ${clonePath}`)
     // logger.info(`bloxFinalName - ${bloxFinalName}`)
+    // const [dir] = [bloxFinalName]
+    // const DIRPATH = path.resolve(dir)
+
+    const prefersSsh = configstore.get('prefersSsh')
+    const originUrl = prefersSsh ? bloxSource.ssh : bloxSource.https
+    // INFO - Git is set in current directory, it could be having other git, might cause issue
+    //        user is adviced to run in a new directory
+    const Git = new GitManager('.', bloxFinalName, originUrl, prefersSsh)
+    if (userHasProvidedRepoUrl) {
+      await Git.clone(path.resolve(clonePath, cloneDirName))
+      const emptyDir = await isDirEmpty(path.resolve(clonePath, cloneDirName), '.git')
+      if (!emptyDir) {
+        console.log(`${chalk.bgRed('ERROR')}: Expected to find an empty repo`)
+        process.exit(1)
+      }
+    }
 
     const bloxDetails = {
       name: bloxFinalName,
@@ -201,9 +247,11 @@ const create = async (userPassedName, options, _, returnBeforeCreatingTemplates,
        * -------------------------------------------------------------------------
        */
 
-      const prefersSsh = configstore.get('prefersSsh')
-      const originUrl = prefersSsh ? bloxSource.ssh : bloxSource.https
-      const Git = new GitManager(entry, cloneDirName, originUrl, prefersSsh)
+      // const prefersSsh = configstore.get('prefersSsh')
+      // const originUrl = prefersSsh ? bloxSource.ssh : bloxSource.https
+      // const Git = new GitManager(entry, cloneDirName, originUrl, prefersSsh)
+
+      Git.cd(entry)
 
       await Git.newBranch('main')
       await Git.stageAll()

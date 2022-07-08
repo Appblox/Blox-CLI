@@ -12,6 +12,7 @@
   "type": "module",
   "license": "ISC",
   "dependencies": {
+    "blox-js-sdk": "^0.0.4",
     "node-blox-sdk": "^0.0.1"
   }
 }

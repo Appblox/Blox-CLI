@@ -49,6 +49,25 @@ function getBloxName() {
     .catch((err) => console.log(err))
 }
 
+function sourceUrlOptions() {
+  const questions = [
+    {
+      type: 'list',
+      name: 'sourceUrl',
+      message: 'Would you like to provide a source url',
+      choices: [
+        { name: 'Yes, let me share', value: 1 },
+        { name: 'No, take me to connect', value: 2 },
+        { name: 'cancel', value: 0 },
+      ],
+    },
+  ]
+  return inquirer
+    .prompt(questions)
+    .then((ans) => ans.sourceUrl)
+    .catch((err) => console.log('o_0', err))
+}
+
 function getMergeConfirmation() {
   // TODO : provide options to accept only the removals, or addition and also a manual edit with
   //        vscode/text-editor integration
@@ -344,4 +363,5 @@ module.exports = {
   readInput,
   confirmationPrompt,
   getMergeConfirmation,
+  sourceUrlOptions,
 }

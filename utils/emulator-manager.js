@@ -1,3 +1,4 @@
+/* eslint-disable guard-for-in */
 /**
  * Copyright (c) Appblox. and its affiliates.
  *
@@ -7,6 +8,9 @@
 
 const fs = require('fs')
 const fsPromise = require('fs/promises')
+// const { readdirSync, readFileSync, existsSync } = require('fs')
+// const { execSync } = require('child_process')
+// const { compare } = require('compare-versions')
 
 const { runBash } = require('../subcommands/bash')
 
@@ -76,6 +80,83 @@ console.log("Functions emulator started on port ${PORT}");
   }
 }
 `
+
+  // const getPackageJson = () => {
+  //   const devDependencies = {}
+  //   const dependencies = {}
+  //   const getDirectories = (source) =>
+  //     readdirSync(source, { withFileTypes: true })
+  //       .filter((dirent) => dirent.isDirectory())
+  //       .map((dirent) => dirent.name)
+
+  //   const directories = getDirectories('./functions')
+  //   let packages = {}
+  //   let tempPackageJson = null
+
+  //   for (let i = 0; i < directories.length; i+=1) {
+  //     console.log(`========================${directories[i]}================================`)
+
+  //     const file = `./functions/${directories[i]}/package.json`
+  //     const data = readFileSync(file, 'utf8')
+  //     if (data) {
+  //       packages = JSON.parse(data)
+  //       tempPackageJson = packages
+  //       if (packages.devDependencies) {
+  //         // eslint-disable-next-line guard-for-in
+  //         for (let dep in packages.devDependencies) {
+  //           // console.log('each dep = ', dep, packages.devDependencies[dep], devDependencies[dep])
+  //           const thisVersion = packages.devDependencies[dep]
+  //           if (devDependencies[dep] && devDependencies[dep] !== thisVersion) {
+  //             if (compare(thisVersion, devDependencies[dep], '>')) {
+  //               devDependencies[dep] = thisVersion
+  //             }
+  //             // console.log(dep, devDependencies[dep], thisItem, devDependencies[dep] !== thisItem)
+  //           } else {
+  //             devDependencies[dep] = thisVersion
+  //           }
+  //         }
+  //       }
+  //       console.log('-------------------------------------------------------------------------')
+  //       if (packages.dependencies) {
+  //         for (let dep in packages.dependencies) {
+  //           // console.log('each dep = ', dep, packages.devDependencies[dep], devDependencies[dep])
+  //           const thisItem = packages.dependencies[dep]
+  //           if (dependencies[dep] && thisItem !== dependencies[dep]) {
+  //             try {
+  //               if (compare(thisItem, dependencies[dep], '>')) {
+  //                 dependencies[dep] = thisItem
+  //               }
+  //             } catch (e) {
+  //               dependencies[dep] = thisItem
+  //             }
+
+  //             // console.log(dep, thisItem, dependencies[dep], thisItem !== dependencies[dep])
+  //           } else {
+  //             dependencies[dep] = thisItem
+  //           }
+  //         }
+  //       }
+  //     }
+  //     // console.log(dependencies)
+  //   }
+
+  //   const dir = './tmp'
+
+  //   if (!existsSync(dir)) {
+  //     tempPackageJson.dependencies = { ...dependencies, express: '^4.17.2', http: '0.0.1-security', cors: '^2.8.5' }
+  //     tempPackageJson.devDependencies = devDependencies
+  //     // mkdirSync(dir)
+  //     // writeFileSync(`${dir}/package.json`, JSON.stringify(tempPackageJson, null, 2))
+  //     return JSON.stringify(tempPackageJson, null, 2)
+  //     // execSync(`cd ${dir} && npm i && tar -czvf nodemodules.tar.gz node_modules`)
+  //     // execSync(`cd ${dir} && pnpm i`)
+  //   }
+  // }
+
+  // const packageJson = getPackageJson()
+
+  // console.log(packageJson)
+
   const gitignoreAddEm = `
   if grep -R "._ab_em" .gitignore
 then

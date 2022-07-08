@@ -38,7 +38,7 @@ let Emitter
 function Abort(msg) {
   // eslint-disable-next-line no-console
   console.log(`Aborting ${msg}`)
-  process.exit(0)
+  // process.exit(0)
 }
 
 // TODO -- killing thread, is it a good choice? could use .kill ??

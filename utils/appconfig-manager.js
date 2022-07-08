@@ -43,7 +43,12 @@ const getPortFromWebpack = async (dir) => {
   let wb = ''
   // NOTE: Since webpack is mostly ESM, only way to import to
   // CJS(this is CJS) is to use dynamic import, CAN'T USE REQUIRE
-  wb = await import(path.resolve(dir, 'webpack.config.js'))
+  try {
+    wb = await import(path.resolve(dir, 'webpack.config.js'))
+  } catch (err) {
+    // console.log(err)
+    wb = { default: { devServer: { port: 3000 } } }
+  }
   return wb.default.devServer.port || 3000
 }
 class AppbloxConfigManager {
@@ -231,7 +236,9 @@ class AppbloxConfigManager {
       if (err.code === 'ENOENT') {
         console.log('Couldnt find live config')
         // throw new Error(`Couldnt find liveconfig file in ${this.cwd}`)
+        let entryCount = 0
         for await (const bloxname of this.allBloxNames) {
+          entryCount += 1
           let p = 3000
           if (this.isUiBlox(bloxname)) {
             p = await getPortFromWebpack(this.getBlox(bloxname).directory)
@@ -247,8 +254,10 @@ class AppbloxConfigManager {
             pid: null,
           }
         }
-        console.log('formed livedata and updating to live data file...')
-        this._writeLive()
+        if (entryCount) {
+          console.log('formed livedata and updating to live data file...')
+          await this._writeLive()
+        }
       }
     }
   }
