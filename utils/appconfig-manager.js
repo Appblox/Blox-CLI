@@ -470,7 +470,7 @@ class AppbloxConfigManager {
    * @returns {Boolean} True if blox is live, else False
    */
   isLive(blox) {
-    return this.liveDetails[blox].isOn
+    return this.liveDetails[blox]?.isOn
   }
 
   /**
