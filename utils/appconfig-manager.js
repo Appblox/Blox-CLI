@@ -243,7 +243,7 @@ class AppbloxConfigManager {
           if (this.isUiBlox(bloxname)) {
             p = await getPortFromWebpack(this.getBlox(bloxname).directory)
           }
-          console.log(p)
+          // console.log(p)
           this.liveDetails[bloxname] = {
             log: {
               out: `./logs/out/${bloxname}.log`,
@@ -470,7 +470,7 @@ class AppbloxConfigManager {
    * @returns {Boolean} True if blox is live, else False
    */
   isLive(blox) {
-    return this.liveDetails[blox].isOn
+    return this.liveDetails[blox]?.isOn
   }
 
   /**

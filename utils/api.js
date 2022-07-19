@@ -27,6 +27,7 @@ api.appBloxGetAppConfig = `${api.appBloxRegistryOrigin}/api/registry/v0.1/get-ap
 api.appRegistryAssignTags = `${api.appBloxRegistryOrigin}/api/registry/v0.1/assign-blox-tags`
 api.appRegistryAssignCategories = `${api.appBloxRegistryOrigin}/api/registry/v0.1/assign-blox-category`
 api.appRegistryGetCategories = `${api.appBloxRegistryOrigin}/api/registry/v0.1/list-categories`
+api.saveDependencies = `${api.appBloxRegistryOrigin}/api/registry/v0.1/upsert-dependencies`
 
 const github = {}
 github.githubOrigin = `https://github.com`

@@ -6,10 +6,12 @@
  */
 
 const { default: axios } = require('axios')
+const { readFileSync } = require('fs')
+const path = require('path')
 const semver = require('semver')
 const Spinnies = require('spinnies')
 const { configstore } = require('../configstore')
-const { appBloxAddVersion } = require('../utils/api')
+const { appBloxAddVersion, saveDependencies } = require('../utils/api')
 const { appConfig } = require('../utils/appconfigStore')
 const convertGitSshUrlToHttps = require('../utils/convertGitUrl')
 const { getShieldHeader } = require('../utils/getHeaders')
@@ -89,6 +91,29 @@ const publish = async (bloxname) => {
     if (data.err) {
       throw new Error('Something went wrong from our side\n', data.msg).message
     }
+
+    spinnies.update('p1', { text: `Saving dependencies` })
+
+    // update dependencies => NOTE: currently node
+    const packageJson = JSON.parse(readFileSync(path.resolve(bloxDetails.directory, 'package.json')))
+    const versionId = data.data.id
+
+    const dependencies = [packageJson.dependencies, packageJson.devDependencies]
+    dependencies.forEach(async (dep, i) => {
+      if (Object.keys(dep)?.length > 0) {
+        await axios.post(
+          saveDependencies,
+          {
+            blox_id: bloxid,
+            blox_version_id: versionId,
+            dependencies: dep,
+            dependencies_type: i, // using index since dependencies is 0 and devDependencies is 1
+          },
+          { headers }
+        )
+      }
+    })
+
     // const res = data.data
     spinnies.succeed('p1', { text: 'Success' })
   } catch (error) {

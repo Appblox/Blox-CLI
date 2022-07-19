@@ -43,7 +43,7 @@ class GitManager {
    *
    * @param {String} cwd The directory path where the command is to be run
    * @param {String} reponame Name of repo
-   * @param {String} url Source url (git repo https or ssh id ssh is true)
+   * @param {String} url Source url (git repo https or ssh id if ssh is true)
    * @param {Boolean} ssh If passed url is ssh, then true else false
    */
   constructor(cwd, reponame, url, ssh) {
